@@ -556,6 +556,7 @@
         "hideQuickInsertHint": "Hide quick insert hint",
         "hideLinkPopup": "Hide link popup",
         "autoCheck": "Auto check",
+        "autoNormalizeMarkdownOnOpen": "Auto-normalize line endings on open",
         "wrapCodeBlocks": "Wrap code blocks"
       }
     },

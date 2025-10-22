@@ -18,7 +18,7 @@ const EVENT_NAME = {
   file: 'mt::update-file'
 }
 
-const add = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTrailingNewline) => {
+const add = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTrailingNewline, autoNormalizeMarkdownOnOpen) => {
   const stats = await fsPromises.stat(pathname)
   const birthTime = stats.birthtime
   const isMarkdown = hasMarkdownExtension(pathname)
@@ -37,7 +37,8 @@ const add = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTraili
         pathname,
         endOfLine,
         autoGuessEncoding,
-        trimTrailingNewline
+        trimTrailingNewline,
+        autoNormalizeMarkdownOnOpen
       )
       file.data = data
     } catch (err) {
@@ -66,7 +67,7 @@ const unlink = (win, pathname, type) => {
   })
 }
 
-const change = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTrailingNewline) => {
+const change = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTrailingNewline, autoNormalizeMarkdownOnOpen) => {
   // No need to update the tree view if the file content has changed.
   if (type === 'dir') return
 
@@ -79,7 +80,8 @@ const change = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTra
         pathname,
         endOfLine,
         autoGuessEncoding,
-        trimTrailingNewline
+        trimTrailingNewline,
+        autoNormalizeMarkdownOnOpen
       )
       const file = {
         pathname,
@@ -194,16 +196,16 @@ class Watcher {
         if (!await this._shouldIgnoreEvent(win.id, pathname, type, usePolling)) {
           const { _preferences } = this
           const eol = _preferences.getPreferredEol()
-          const { autoGuessEncoding, trimTrailingNewline } = _preferences.getAll()
-          add(win, pathname, type, eol, autoGuessEncoding, trimTrailingNewline)
+          const { autoGuessEncoding, trimTrailingNewline, autoNormalizeMarkdownOnOpen } = _preferences.getAll()
+          add(win, pathname, type, eol, autoGuessEncoding, trimTrailingNewline, autoNormalizeMarkdownOnOpen)
         }
       })
       .on('change', async pathname => {
         if (!await this._shouldIgnoreEvent(win.id, pathname, type, usePolling)) {
           const { _preferences } = this
           const eol = _preferences.getPreferredEol()
-          const { autoGuessEncoding, trimTrailingNewline } = _preferences.getAll()
-          change(win, pathname, type, eol, autoGuessEncoding, trimTrailingNewline)
+          const { autoGuessEncoding, trimTrailingNewline, autoNormalizeMarkdownOnOpen } = _preferences.getAll()
+          change(win, pathname, type, eol, autoGuessEncoding, trimTrailingNewline, autoNormalizeMarkdownOnOpen)
         }
       })
       .on('unlink', pathname => unlink(win, pathname, type))

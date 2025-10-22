@@ -160,6 +160,11 @@
           :on-change="(value) => onSelectChange('autoCheck', value)"
         ></bool>
         <bool
+          :description="t('preferences.editor.misc.autoNormalizeMarkdownOnOpen')"
+          :bool="autoNormalizeMarkdownOnOpen"
+          :on-change="(value) => onSelectChange('autoNormalizeMarkdownOnOpen', value)"
+        ></bool>
+        <bool
           :description="t('preferences.editor.misc.wrapCodeBlocks')"
           :bool="wrapCodeBlocks"
           :on-change="(value) => onSelectChange('wrapCodeBlocks', value)"
@@ -209,6 +214,7 @@ const {
   hideQuickInsertHint,
   hideLinkPopup,
   autoCheck,
+  autoNormalizeMarkdownOnOpen,
   wrapCodeBlocks,
   editorLineWidth,
   defaultEncoding,

@@ -230,6 +230,11 @@
     "type": "boolean",
     "default": false
   },
+  "autoNormalizeMarkdownOnOpen": {
+    "description": "Editor--Automatically normalize line endings and detect trailing newline settings when opening files. When disabled, files are opened as-is and only normalized when saved.",
+    "type": "boolean",
+    "default": false
+  },
   "preferLooseListItem": {
     "description": "Markdown--The preferred list type",
     "type": "boolean",

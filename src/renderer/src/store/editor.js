@@ -1036,6 +1036,12 @@ export const useEditorStore = defineStore('editor', {
         this.toc = listToTree(toc)
       }
 
+      // Ignore the first content change after file load (Muya normalizes content)
+      if (this.currentFile.isFirstContentChange) {
+        this.currentFile.isFirstContentChange = false
+        return
+      }
+
       if (markdown !== oldMarkdown) {
         this.currentFile.isSaved = false
         if (pathname && autoSave) {
