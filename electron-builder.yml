@@ -46,7 +46,7 @@ extraResources:
     filter:
       - '**/*'
       - '!locales/**/!(*.min).json'
-npmRebuild: false
+npmRebuild: true
 electronLanguages: # Avoid packaging all chromium locales since our app has in-built locales
   - en-US
 

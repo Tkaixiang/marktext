@@ -15,8 +15,9 @@
     "build": "electron-vite build",
     "build:unpack": "npm run minify-locales && npm run build && electron-builder --dir",
     "build:win": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --win --publish never",
-    "build:mac": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --mac --publish never",
-    "build:linux": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --linux --publish never"
+    "build:mac": "npm run minify-locales && npm run build && electron-builder --mac --publish never",
+    "build:linux": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --linux --publish never",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",

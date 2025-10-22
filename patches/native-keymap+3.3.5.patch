@@ -1,0 +1,16 @@
+diff --git a/node_modules/native-keymap/binding.gyp b/node_modules/native-keymap/binding.gyp
+index 9e0db01..b587ee8 100644
+--- a/node_modules/native-keymap/binding.gyp
++++ b/node_modules/native-keymap/binding.gyp
+@@ -62,6 +62,11 @@
+           "sources": [
+             "src/keyboard_mac.mm"
+           ],
++          'xcode_settings': {
++            'CLANG_CXX_LANGUAGE_STANDARD': 'c++20',
++            'CLANG_CXX_LIBRARY': 'libc++',
++            'MACOSX_DEPLOYMENT_TARGET': '11.0'
++          },
+           'link_settings' : {
+             'libraries' : [
+               '-framework Cocoa'
