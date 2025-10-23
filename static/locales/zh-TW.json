@@ -476,6 +476,7 @@
         "title": "啟動",
         "openDefaultDirectory": "開啟預設目錄",
         "selectFolder": "選擇資料夾",
+        "openLastFolder": "開啟上次開啟的資料夾",
         "openBlankPage": "開啟空白頁面"
       },
       "sidebar": {

@@ -476,6 +476,7 @@
         "title": "Inicialização",
         "openDefaultDirectory": "Abrir diretório padrão",
         "selectFolder": "Selecionar Pasta",
+        "openLastFolder": "Abrir última pasta aberta",
         "openBlankPage": "Abrir página em branco"
       },
       "sidebar": {

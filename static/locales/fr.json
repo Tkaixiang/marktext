@@ -476,6 +476,7 @@
         "title": "Démarrage",
         "openDefaultDirectory": "Ouvrir le répertoire par défaut",
         "selectFolder": "Sélectionner un dossier",
+        "openLastFolder": "Ouvrir le dernier dossier ouvert",
         "openBlankPage": "Ouvrir une page vierge"
       },
       "sidebar": {

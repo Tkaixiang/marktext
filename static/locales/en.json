@@ -475,6 +475,7 @@
         "title": "Startup",
         "openDefaultDirectory": "Open default directory",
         "selectFolder": "Select Folder",
+        "openLastFolder": "Open last opened folder",
         "openBlankPage": "Open blank page"
       },
       "sidebar": {
