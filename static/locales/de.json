@@ -475,6 +475,7 @@
         "title": "Start",
         "openDefaultDirectory": "Standardverzeichnis öffnen",
         "selectFolder": "Ordner auswählen",
+        "openLastFolder": "Zuletzt geöffneten Ordner öffnen",
         "openBlankPage": "Leere Seite öffnen"
       },
       "sidebar": {

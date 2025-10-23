@@ -476,6 +476,7 @@
         "title": "시작",
         "openDefaultDirectory": "기본 디렉터리 열기",
         "selectFolder": "폴더 선택",
+        "openLastFolder": "마지막으로 연 폴더 열기",
         "openBlankPage": "빈 페이지 열기"
       },
       "sidebar": {

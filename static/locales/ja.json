@@ -476,6 +476,7 @@
         "title": "起動",
         "openDefaultDirectory": "デフォルトディレクトリを開く",
         "selectFolder": "フォルダを選択",
+        "openLastFolder": "最後に開いたフォルダを開く",
         "openBlankPage": "空白ページを開く"
       },
       "sidebar": {

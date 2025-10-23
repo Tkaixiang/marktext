@@ -209,10 +209,15 @@ class App {
       }
     }
 
-    const { startUpAction, defaultDirectoryToOpen, autoSwitchTheme, theme } = preferences.getAll()
+    const { startUpAction, defaultDirectoryToOpen, lastOpenedFolder, autoSwitchTheme, theme } = preferences.getAll()
 
     if (startUpAction === 'folder' && defaultDirectoryToOpen) {
       const info = normalizeMarkdownPath(defaultDirectoryToOpen)
+      if (info) {
+        _openFilesCache.unshift(info)
+      }
+    } else if (startUpAction === 'openLastFolder' && lastOpenedFolder) {
+      const info = normalizeMarkdownPath(lastOpenedFolder)
       if (info) {
         _openFilesCache.unshift(info)
       }
@@ -326,6 +331,11 @@ class App {
    * @returns {EditorWindow} The created editor window.
    */
   _createEditorWindow(rootDirectory = null, fileList = [], markdownList = [], options = {}) {
+    // Save the last opened folder when opening a directory
+    if (rootDirectory) {
+      this._accessor.preferences.setItems({ lastOpenedFolder: rootDirectory })
+    }
+
     const editor = new EditorWindow(this._accessor)
     editor.createWindow(rootDirectory, fileList, markdownList, options)
     this._windowManager.add(editor)
@@ -583,6 +593,10 @@ class App {
 
     ipcMain.on('app-open-directory-by-id', (windowId, pathname, openInSameWindow) => {
       const { openFolderInNewWindow } = this._accessor.preferences.getAll()
+
+      // Save the last opened folder
+      this._accessor.preferences.setItems({ lastOpenedFolder: pathname })
+
       if (openInSameWindow || !openFolderInNewWindow) {
         const editor = this._windowManager.get(windowId)
         if (editor) {

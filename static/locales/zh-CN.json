@@ -476,6 +476,7 @@
         "title": "启动",
         "openDefaultDirectory": "打开默认目录",
         "selectFolder": "选择文件夹",
+        "openLastFolder": "打开上次打开的文件夹",
         "openBlankPage": "打开空白页"
       },
       "sidebar": {

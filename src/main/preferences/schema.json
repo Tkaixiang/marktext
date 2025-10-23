@@ -59,12 +59,17 @@
     "enum": [
       "folder",
       "lastState",
+      "openLastFolder",
       "blank"
     ],
     "default": "blank"
   },
   "defaultDirectoryToOpen": {
     "description": "General--The default directory that should be opened on startup when startUp=folder.",
+    "type": "string"
+  },
+  "lastOpenedFolder": {
+    "description": "General--The last folder that was opened in MarkText.",
     "type": "string"
   },
   "language": {

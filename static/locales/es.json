@@ -475,6 +475,7 @@
         "title": "Inicio",
         "openDefaultDirectory": "Abrir directorio predeterminado",
         "selectFolder": "Seleccionar Carpeta",
+        "openLastFolder": "Abrir última carpeta abierta",
         "openBlankPage": "Abrir página en blanco"
       },
       "sidebar": {

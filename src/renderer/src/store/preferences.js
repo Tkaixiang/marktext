@@ -15,6 +15,7 @@ export const usePreferencesStore = defineStore('preferences', {
     fileSortBy: 'created',
     startUpAction: 'lastState',
     defaultDirectoryToOpen: '',
+    lastOpenedFolder: '',
     treePathExcludePatterns: [],
     language: 'en',
 
