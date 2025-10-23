@@ -101,14 +101,14 @@
               Hide "lastState" for now (#2064).
             <el-radio class="ag-underdevelop" label="lastState">Restore last editor session</el-radio>
             -->
-            <el-radio label="folder" style="margin-bottom: 10px"
+            <el-radio label="folder" style="margin-bottom: 10px; display: block"
               >{{ t('preferences.general.startup.openDefaultDirectory') }}<span>: {{ defaultDirectoryToOpen }}</span></el-radio
             >
             <el-button size="small" @click="selectDefaultDirectoryToOpen">{{ t('preferences.general.startup.selectFolder') }}</el-button>
-            <el-radio label="openLastFolder" style="margin-bottom: 10px"
+            <el-radio label="openLastFolder" style="margin-bottom: 10px; display: block"
               >{{ t('preferences.general.startup.openLastFolder') }}<span v-if="lastOpenedFolder">: {{ lastOpenedFolder }}</span></el-radio
             >
-            <el-radio label="blank">{{ t('preferences.general.startup.openBlankPage') }}</el-radio>
+            <el-radio label="blank" style="display: block">{{ t('preferences.general.startup.openBlankPage') }}</el-radio>
           </el-radio-group>
         </section>
       </template>
