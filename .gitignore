@@ -12,3 +12,4 @@ doc/
 temp/
 logs/
 *.min.json
+.claude/settings.local.json
