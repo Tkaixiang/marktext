@@ -367,6 +367,10 @@ kbd {
     padding-left: 30px;
   }
 
+  ul {
+    padding-bottom: 20px;
+  }
+
   ul:first-child,
   ol:first-child {
     margin-top: 0;
