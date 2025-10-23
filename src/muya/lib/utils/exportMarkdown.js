@@ -184,6 +184,11 @@ class ExportMarkdown {
     const { text } = block.children[0]
     if (headingStyle === 'atx') {
       const match = text.match(/(#{1,6})(.*)/)
+      if (!match) {
+        // Fallback: if regex doesn't match, return text as-is
+        console.warn('normalizeHeaderText: ATX heading regex did not match:', text)
+        return `${indent}${text}\n`
+      }
       const atxHeadingText = `${match[1]} ${match[2].trim()}`
       return `${indent}${atxHeadingText}\n`
     } else if (headingStyle === 'setext') {
