@@ -53,8 +53,8 @@
       </div>
       <div v-show="showDirectories" class="tree-wrapper">
         <folder
-          v-for="(folder, index) of projectTree.folders"
-          :key="index + 'folder'"
+          v-for="folder of projectTree.folders"
+          :key="folder.id"
           :folder="folder"
           :depth="depth"
         ></folder>
@@ -69,8 +69,8 @@
           @keypress.enter="handleInputEnter"
         />
         <file
-          v-for="(file, index) of projectTree.files"
-          :key="index + 'file'"
+          v-for="file of projectTree.files"
+          :key="file.id"
           :file="file"
           :depth="depth"
         ></file>
@@ -102,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useProjectStore } from '@/store/project'
 import { useEditorStore } from '@/store/editor'

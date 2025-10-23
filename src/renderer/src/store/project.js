@@ -16,7 +16,9 @@ export const useProjectStore = defineStore('project', {
     newFileNameCache: '',
     renameCache: null,
     clipboard: null,
-    projectTree: null
+    projectTree: null,
+    // Buffer for events received before projectTree is initialized
+    pendingTreeEvents: []
   }),
 
   actions: {
@@ -47,42 +49,58 @@ export const useProjectStore = defineStore('project', {
         }
         layoutStore.SET_LAYOUT(layout)
         layoutStore.DISPATCH_LAYOUT_MENU_ITEMS()
+
+        // Process any pending events that arrived before projectTree was initialized
+        for (const event of this.pendingTreeEvents) {
+          this._processTreeEvent(event.type, event.change)
+        }
+        this.pendingTreeEvents = []
       })
     },
 
     LISTEN_FOR_UPDATE_PROJECT() {
       const editorStore = useEditorStore()
       window.electron.ipcRenderer.on('mt::update-object-tree', (e, { type, change }) => {
-        switch (type) {
-          case 'add': {
-            const { pathname, data, isMarkdown } = change
-            addFile(this.projectTree, change)
-            if (isMarkdown && this.newFileNameCache && pathname === this.newFileNameCache) {
-              const fileState = getFileStateFromData(data)
-              editorStore.UPDATE_CURRENT_FILE(fileState)
-              this.newFileNameCache = ''
-            }
-            break
-          }
-          case 'unlink':
-            unlinkFile(this.projectTree, change)
-            editorStore.SET_SAVE_STATUS_WHEN_REMOVE(change)
-            break
-          case 'addDir':
-            addDirectory(this.projectTree, change)
-            break
-          case 'unlinkDir':
-            unlinkDirectory(this.projectTree, change)
-            break
-          case 'change':
-            break
-          default:
-            if (process.env.NODE_ENV === 'development') {
-              console.log(`Unknown directory watch type: "${type}"`)
-            }
-            break
+        // Buffer events if projectTree is not initialized yet
+        if (!this.projectTree) {
+          this.pendingTreeEvents.push({ type, change })
+          return
         }
+        this._processTreeEvent(type, change)
       })
+    },
+
+    _processTreeEvent(type, change) {
+      const editorStore = useEditorStore()
+      switch (type) {
+        case 'add': {
+          const { pathname, data, isMarkdown } = change
+          addFile(this.projectTree, change)
+          if (isMarkdown && this.newFileNameCache && pathname === this.newFileNameCache) {
+            const fileState = getFileStateFromData(data)
+            editorStore.UPDATE_CURRENT_FILE(fileState)
+            this.newFileNameCache = ''
+          }
+          break
+        }
+        case 'unlink':
+          unlinkFile(this.projectTree, change)
+          editorStore.SET_SAVE_STATUS_WHEN_REMOVE(change)
+          break
+        case 'addDir':
+          addDirectory(this.projectTree, change)
+          break
+        case 'unlinkDir':
+          unlinkDirectory(this.projectTree, change)
+          break
+        case 'change':
+          break
+        default:
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Unknown directory watch type: "${type}"`)
+          }
+          break
+      }
     },
 
     CHANGE_ACTIVE_ITEM(activeItem) {

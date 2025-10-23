@@ -101,7 +101,15 @@ export const addDirectory = (tree, dir) => {
         folders: [],
         files: []
       }
-      currentSubFolders.push(childFolder)
+      // Insert folder in alphabetical order
+      const idx = currentSubFolders.findIndex((f) => {
+        return f.name.localeCompare(directoryName) > 0
+      })
+      if (idx !== -1) {
+        currentSubFolders.splice(idx, 0, childFolder)
+      } else {
+        currentSubFolders.push(childFolder)
+      }
     }
 
     currentPath = `${currentPath}${PATH_SEPARATOR}${directoryName}`
