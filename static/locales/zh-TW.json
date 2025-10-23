@@ -380,6 +380,7 @@
       "items": {
         "autoSave": "自動儲存正在編輯的內容",
         "autoSaveDelay": "檔案儲存前的延遲時間（毫秒）",
+        "autoNormalizeMarkdownOnOpen": "開啟檔案時自動規範化行尾並檢測尾隨換行符設定。停用時，檔案按原樣開啟，僅在儲存時規範化",
         "titleBarStyle": "標題欄樣式（僅限 Windows 和 Linux 系統）",
         "openFilesInNewWindow": "在新視窗中開啟檔案",
         "openFolderInNewWindow": "透過選單在新視窗中開啟資料夾",

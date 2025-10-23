@@ -380,6 +380,7 @@
       "items": {
         "autoSave": "Sauvegarder automatiquement le contenu en cours d'édition",
         "autoSaveDelay": "Le temps en ms après un changement avant que le fichier soit sauvegardé",
+        "autoNormalizeMarkdownOnOpen": "Normaliser automatiquement les fins de ligne et détecter les paramètres de saut de ligne final lors de l'ouverture des fichiers. Lorsque désactivé, les fichiers sont ouverts tels quels et normalisés uniquement lors de l'enregistrement",
         "titleBarStyle": "Le style de la barre de titre (systèmes Windows et Linux uniquement)",
         "openFilesInNewWindow": "Ouvrir les fichiers dans une nouvelle fenêtre",
         "openFolderInNewWindow": "Ouvrir le dossier via le menu dans une nouvelle fenêtre",

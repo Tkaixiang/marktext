@@ -380,6 +380,7 @@
       "items": {
         "autoSave": "自动保存正在编辑的内容",
         "autoSaveDelay": "文件保存前的延迟时间（毫秒）",
+        "autoNormalizeMarkdownOnOpen": "打开文件时自动规范化行尾并检测尾随换行符设置。禁用时，文件按原样打开，仅在保存时规范化",
         "titleBarStyle": "标题栏样式（仅限 Windows 和 Linux 系统）",
         "openFilesInNewWindow": "在新窗口中打开文件",
         "openFolderInNewWindow": "通过菜单在新窗口中打开文件夹",

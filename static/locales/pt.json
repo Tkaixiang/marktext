@@ -380,6 +380,7 @@
       "items": {
         "autoSave": "Salvar automaticamente o conteúdo sendo editado",
         "autoSaveDelay": "O tempo em ms após uma mudança que o arquivo é salvo",
+        "autoNormalizeMarkdownOnOpen": "Normalizar automaticamente as terminações de linha e detectar as configurações de nova linha final ao abrir arquivos. Quando desabilitado, os arquivos são abertos como estão e normalizados apenas ao salvar",
         "titleBarStyle": "O estilo da barra de título (apenas sistemas Windows e Linux)",
         "openFilesInNewWindow": "Abrir arquivos em uma nova janela",
         "openFolderInNewWindow": "Abrir pasta via menu em uma nova janela",

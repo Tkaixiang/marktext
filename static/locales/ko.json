@@ -380,6 +380,7 @@
       "items": {
         "autoSave": "편집 중인 내용을 자동으로 저장",
         "autoSaveDelay": "변경 후 파일이 저장되기까지의 시간(밀리초)",
+        "autoNormalizeMarkdownOnOpen": "파일을 열 때 줄 끝을 자동으로 정규화하고 후행 줄바꿈 설정을 감지합니다. 비활성화하면 파일이 그대로 열리고 저장할 때만 정규화됩니다",
         "titleBarStyle": "제목 표시줄 스타일(Windows 및 Linux 시스템만)",
         "openFilesInNewWindow": "새 창에서 파일 열기",
         "openFolderInNewWindow": "메뉴를 통해 새 창에서 폴더 열기",

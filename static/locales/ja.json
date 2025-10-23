@@ -380,6 +380,7 @@
       "items": {
         "autoSave": "編集中のコンテンツを自動保存",
         "autoSaveDelay": "変更後にファイルが保存されるまでの時間（ミリ秒）",
+        "autoNormalizeMarkdownOnOpen": "ファイルを開く際に行末を自動的に正規化し、末尾の改行設定を検出します。無効にすると、ファイルはそのまま開かれ、保存時にのみ正規化されます",
         "titleBarStyle": "タイトルバーのスタイル（WindowsおよびLinuxシステムのみ）",
         "openFilesInNewWindow": "新しいウィンドウでファイルを開く",
         "openFolderInNewWindow": "メニューから新しいウィンドウでフォルダを開く",

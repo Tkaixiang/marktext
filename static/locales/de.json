@@ -379,6 +379,7 @@
       "items": {
         "autoSave": "Den bearbeiteten Inhalt automatisch speichern",
         "autoSaveDelay": "Die Zeit in ms nach einer Änderung, bis die Datei gespeichert wird",
+        "autoNormalizeMarkdownOnOpen": "Zeilenenden beim Öffnen automatisch normalisieren und Einstellungen für nachfolgende Zeilenumbrüche erkennen. Bei Deaktivierung werden Dateien unverändert geöffnet und nur beim Speichern normalisiert",
         "titleBarStyle": "Der Titelleisten-Stil (nur Windows und Linux-System)",
         "openFilesInNewWindow": "Dateien in einem neuen Fenster öffnen",
         "openFolderInNewWindow": "Ordner über Menü in einem neuen Fenster öffnen",
