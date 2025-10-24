@@ -202,3 +202,80 @@ npm run build:win
 - Current branch: `test/windows-spectre-fix` (testing)
 - Original branch: `fix/macos-native-module-compilation` (PR #24)
 - If successful, merge test branch into original branch
+
+---
+
+## TEST RESULTS (2025-10-24 17:30 UTC)
+
+### ✅ SPECTRE FIX: **SUCCESS!**
+
+**What We Did:**
+1. Cleaned node_modules and package-lock.json
+2. Ran `npm install --ignore-scripts` (installed packages without building native modules)
+3. Ran `npx patch-package` (applied the SpectreMitigation patch)
+4. Verified patch was applied: `'SpectreMitigation': 'false'` ✓
+5. Ran `npm rebuild` → **Rebuilt dependencies successfully WITHOUT MSB8040 Spectre error!**
+
+**Result:** The Spectre mitigation bypass patch **works perfectly**. Native modules (native-keymap, ced, keytar) all compiled successfully on Windows without requiring Spectre-mitigated libraries.
+
+### ❌ SECONDARY ISSUE: electron-vite ESM/CommonJS Error
+
+**Problem:** After successful native module compilation, attempting to run `npm run dev` or `npm run build` fails with:
+```
+Error [ERR_REQUIRE_ESM]: require() of ES Module C:\git\marktext\node_modules\electron-vite\dist\index.js from C:\git\marktext\electron.vite.config.js not supported.
+```
+
+**Root Cause:** electron-vite v4.0.1 requires Node.js ^20.19.0 or >=22.12.0, but Windows machine is running Node.js v20.18.0 (just one minor version behind).
+
+**Solution Required:** Upgrade Node.js to v20.19.0 or higher on Windows machine.
+
+### NEXT STEPS
+
+**Option 1: Upgrade Node.js (Recommended)**
+- Download Node.js 20.19.0 or newer from https://nodejs.org/
+- Reinstall and test the build
+
+**Option 2: Downgrade electron-vite**
+- Modify package.json to use an older electron-vite version compatible with Node 20.18.0
+- Test if this resolves the ESM issue
+
+**After Resolving Node.js Issue:**
+1. Test full Windows build with `npm run build:win`
+2. Verify the installer works and runs correctly
+3. Merge `test/windows-spectre-fix` → `fix/macos-native-module-compilation`
+4. Update PR #24 to cover both platforms
+
+---
+
+## FINAL SUCCESS! (2025-10-24 18:27 UTC)
+
+### 🎉 COMPLETE WINDOWS BUILD SUCCESS!
+
+**Node.js Upgrade:**
+- Upgraded from v20.18.0 → **v20.19.5**
+
+**Build Results:**
+```bash
+npm install --ignore-scripts && npx patch-package && npm rebuild
+npm run build:win
+```
+
+✅ **All native modules compiled successfully** (no Spectre errors!)
+✅ **Dev server runs perfectly** (electron-vite ESM issue resolved)
+✅ **Full production build completed**
+✅ **Windows installer created:** `dist/marktext-win-x64-0.18.5-setup.exe` (123.5 MB)
+
+**What Worked:**
+1. Spectre mitigation bypass patch (`'SpectreMitigation': 'false'`) ✓
+2. Node.js v20.19.5 (satisfies electron-vite v4.0.1 requirements) ✓
+3. Proper installation sequence:
+   - `npm install --ignore-scripts` (prevent early compilation)
+   - `npx patch-package` (apply patches)
+   - `npm rebuild` (compile with patched code)
+
+### READY FOR NEXT STEPS:
+
+1. ✅ **Test the installer** - Run `dist/marktext-win-x64-0.18.5-setup.exe` to verify it installs and launches correctly
+2. **Merge branches** - Merge `test/windows-spectre-fix` → `fix/macos-native-module-compilation`
+3. **Update PR #24** - Expand title/description to cover both macOS and Windows native module fixes
+4. **Document requirements** - Update build docs to specify Node.js ≥20.19.0 requirement
