@@ -1,7 +1,16 @@
 diff --git a/node_modules/native-keymap/binding.gyp b/node_modules/native-keymap/binding.gyp
-index 9e0db01..b587ee8 100644
+index 9e0db01..422058e 100644
 --- a/node_modules/native-keymap/binding.gyp
 +++ b/node_modules/native-keymap/binding.gyp
+@@ -7,7 +7,7 @@
+         "src/keymapping.cc"
+       ],
+       'msvs_configuration_attributes': {
+-        'SpectreMitigation': 'Spectre'
++        'SpectreMitigation': 'false'
+       },
+       'msvs_settings': {
+         'VCCLCompilerTool': {
 @@ -62,6 +62,11 @@
            "sources": [
              "src/keyboard_mac.mm"
