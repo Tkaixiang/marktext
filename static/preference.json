@@ -69,5 +69,7 @@
   "searchNoIgnore": false,
   "searchFollowSymlinks": true,
 
-  "watcherUsePolling": false
+  "watcherUsePolling": false,
+
+  "autoReloadUnmodifiedFiles": true
 }

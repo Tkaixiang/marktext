@@ -77,6 +77,8 @@ export const usePreferencesStore = defineStore('preferences', {
 
     watcherUsePolling: false,
 
+    autoReloadUnmodifiedFiles: true,
+
     // --------------------------------------------------------------------------
 
     // Edit modes of the current window (not part of persistent settings)

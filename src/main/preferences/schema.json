@@ -417,5 +417,10 @@
     "description": "Watcher--Whether to use polling. Polling may leads to high CPU utilization but is necessary to watch files over a network.",
     "type": "boolean",
     "default": false
+  },
+  "autoReloadUnmodifiedFiles": {
+    "description": "Experimental--Automatically reload unmodified documents when changed on disk.",
+    "type": "boolean",
+    "default": true
   }
 }

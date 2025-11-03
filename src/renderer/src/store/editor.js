@@ -71,6 +71,9 @@ export const useEditorStore = defineStore('editor', {
       const style = data.style || 'info'
       // Whether only one notification should exist.
       const exclusiveType = data.exclusiveType || ''
+      const autoHide = data.autoHide || false
+      const autoHideDuration = data.autoHideDuration || 3000
+      const showCountdown = data.showCountdown || false
 
       const tab = this.tabs.find((t) => t.id === tabId)
       if (!tab) {
@@ -95,7 +98,10 @@ export const useEditorStore = defineStore('editor', {
         showConfirm,
         style,
         exclusiveType,
-        action
+        action,
+        autoHide,
+        autoHideDuration,
+        showCountdown
       })
     },
 
@@ -1231,7 +1237,24 @@ export const useEditorStore = defineStore('editor', {
             }
             case 'add':
             case 'change': {
-              const { autoSave } = preferencesStore
+              const { autoSave, autoReloadUnmodifiedFiles } = preferencesStore
+
+              // Check if auto-reload unmodified files is enabled
+              if (autoReloadUnmodifiedFiles && isSaved) {
+                this.loadChange(change)
+                this.pushTabNotification({
+                  tabId: id,
+                  msg: i18n.global.t('store.editor.documentAutoReloaded'),
+                  style: 'success',
+                  showConfirm: false,
+                  exclusiveType: 'file_changed',
+                  autoHide: true,
+                  autoHideDuration: 5000,
+                  showCountdown: true
+                })
+                return
+              }
+
               if (autoSave) {
                 if (autoSaveTimers.has(id)) {
                   const timer = autoSaveTimers.get(id)
