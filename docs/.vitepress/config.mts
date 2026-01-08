@@ -2,7 +2,6 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'MarkText',
-  base: '/docs',
   description: 'Next generation markdown editor',
   ignoreDeadLinks: true,
   themeConfig: {
