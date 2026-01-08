@@ -12,3 +12,7 @@ doc/
 temp/
 logs/
 *.min.json
+
+# vitepress 
+docs/.vitepress/dist
+docs/.vitepress/cache
