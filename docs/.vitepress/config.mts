@@ -2,12 +2,7 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'MarkText',
-<<<<<<< ours
-||||||| ancestor
-  base: '/docs',
-=======
   base: '/marktext',
->>>>>>> theirs
   description: 'Next generation markdown editor',
   ignoreDeadLinks: true,
   themeConfig: {
