@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
+    "types": ["node", "electron"]
+  },
+  "include": [
+    "src/main/**/*",
+    "src/common/**/*"
+  ],
+  "exclude": [
+    "src/muya/**/*",
+    "src/renderer/**/*",
+    "src/preload/**/*"
+  ]
+}

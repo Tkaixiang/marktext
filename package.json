@@ -16,7 +16,11 @@
     "build:unpack": "npm run minify-locales && npm run build && electron-builder --dir",
     "build:win": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --win --publish never",
     "build:mac": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --mac --publish never",
-    "build:linux": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --linux --publish never"
+    "build:linux": "npm run minify-locales && npx @electron/rebuild && npm run build && electron-builder --linux --publish never",
+    "typecheck": "vue-tsc --noEmit && tsc --project tsconfig.main.json --noEmit && tsc --project tsconfig.preload.json --noEmit",
+    "typecheck:main": "tsc --project tsconfig.main.json --noEmit",
+    "typecheck:preload": "tsc --project tsconfig.preload.json --noEmit",
+    "typecheck:renderer": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -77,8 +81,20 @@
     "@babel/eslint-parser": "^7.28.5",
     "@electron-toolkit/eslint-config": "^2.1.0",
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
+    "@types/codemirror": "^5.60.17",
+    "@types/dompurify": "^3.0.5",
+    "@types/electron": "^1.4.38",
+    "@types/fs-extra": "^11.0.4",
+    "@types/katex": "^0.16.7",
+    "@types/node": "^25.0.3",
+    "@types/prismjs": "^1.26.5",
     "@types/source-map-support": "^0.5.10",
+    "@types/turndown": "^5.0.6",
+    "@types/underscore": "^1.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@typescript-eslint/parser": "^8.52.0",
     "@vitejs/plugin-vue": "^6.0.3",
+    "@vue/tsconfig": "^0.8.1",
     "cross-env": "^10.1.0",
     "electron": "^39.2.7",
     "electron-builder": "^26.4.0",
@@ -94,10 +110,12 @@
     "neostandard": "^0.12.2",
     "postcss-preset-env": "^10.5.0",
     "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
     "vite": "^7.3.0",
     "vite-plugin-electron-renderer": "^0.14.6",
     "vite-svg-loader": "^5.1.0",
     "vue": "^3.5.26",
-    "vue-eslint-parser": "^10.2.0"
+    "vue-eslint-parser": "^10.2.0",
+    "vue-tsc": "^3.2.2"
   }
 }
