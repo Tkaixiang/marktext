@@ -55,14 +55,14 @@ const handleError = async (title: string, error: Error, type: 'main' | 'renderer
   // show error dialog
   if (app.isReady()) {
     // Blocking message box
-    const { response } = await dialog.showMessageBox({
+    const { response } = (await dialog.showMessageBox({
       type: 'error',
       buttons: [t('common.ok'), t('error.copyError'), t('error.report')],
       defaultId: 0,
       noLink: true,
       message: title,
       detail: stack
-    })
+    })) as any
 
     switch (response) {
       case 1: {
