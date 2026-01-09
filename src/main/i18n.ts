@@ -10,7 +10,7 @@ let currentLanguage = 'en'
  * @param {object} params - 参数对象
  * @returns {string} 翻译后的文本
  */
-export function t(key, params = {}) {
+export function t(key: string, params: Record<string, any> = {}): string {
   return getTranslation(key, currentLanguage, params)
 }
 
@@ -18,7 +18,7 @@ export function t(key, params = {}) {
  * 获取当前语言
  * @returns {string} 当前语言代码
  */
-export function getCurrentLanguage() {
+export function getCurrentLanguage(): string {
   return currentLanguage
 }
 
@@ -26,7 +26,7 @@ export function getCurrentLanguage() {
  * 设置语言
  * @param {string} language - 语言代码
  */
-export function setLanguage(language) {
+export function setLanguage(language: string): void {
   currentLanguage = language
 
   const windows = BrowserWindow.getAllWindows()

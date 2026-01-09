@@ -84,7 +84,6 @@
     "@types/codemirror": "^5.60.17",
     "@types/command-exists": "^1.2.3",
     "@types/dompurify": "^3.0.5",
-    "@types/electron": "^1.4.38",
     "@types/fs-extra": "^11.0.4",
     "@types/fuzzaldrin": "^2.1.7",
     "@types/katex": "^0.16.7",

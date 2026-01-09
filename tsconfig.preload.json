@@ -10,6 +10,7 @@
   },
   "include": [
     "src/preload/**/*",
-    "src/common/**/*"
+    "src/common/**/*",
+    "src/types/**/*"
   ]
 }

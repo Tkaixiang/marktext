@@ -1,9 +1,11 @@
 import path from 'path'
+import { BrowserWindowConstructorOptions } from 'electron'
+
 export const isOsx = process.platform === 'darwin'
 export const isWindows = process.platform === 'win32'
 export const isLinux = process.platform === 'linux'
 
-export const editorWinOptions = Object.freeze({
+export const editorWinOptions: BrowserWindowConstructorOptions = Object.freeze({
   minWidth: 550,
   minHeight: 350,
   webPreferences: {
@@ -23,7 +25,7 @@ export const editorWinOptions = Object.freeze({
   zoomFactor: 1.0
 })
 
-export const preferencesWinOptions = Object.freeze({
+export const preferencesWinOptions: BrowserWindowConstructorOptions = Object.freeze({
   minWidth: 450,
   minHeight: 350,
   width: 950,

@@ -17,13 +17,13 @@ const SHOW_ERROR_DIALOG = !process.env.MARKTEXT_ERROR_INTERACTION
 const ERROR_MSG_MAIN = () => t('error.unexpectedMainProcess')
 const ERROR_MSG_RENDERER = () => t('error.unexpectedRendererProcess')
 
-let logger = (s) => console.error(s)
+let logger = (s: string) => console.error(s)
 
 const getOSInformation = () => {
   return `${os.type()} ${os.arch()} ${os.release()} (${os.platform()})`
 }
 
-const exceptionToString = (error, type) => {
+const exceptionToString = (error: Error, type: string) => {
   const { message, stack } = error
   return (
     `Version: ${MARKTEXT_VERSION_STRING || app.getVersion()}\n` +
@@ -35,7 +35,7 @@ const exceptionToString = (error, type) => {
   )
 }
 
-const handleError = async (title, error, type) => {
+const handleError = async (title: string, error: Error, type: 'main' | 'renderer') => {
   const { message, stack } = error
 
   // Write error into file
@@ -95,19 +95,19 @@ Operating system: ${getOSInformation()}`
     }
   } else {
     // error during Electron initialization
-    dialog.showErrorBox(title, stack)
+    dialog.showErrorBox(title, stack || 'Unknown error')
     process.exit(1)
   }
 }
 
 const setupExceptionHandler = () => {
   // main process error handler
-  process.on('uncaughtException', (error) => {
+  process.on('uncaughtException', (error: Error) => {
     handleError(ERROR_MSG_MAIN(), error, 'main')
   })
 
   // renderer process error handler
-  ipcMain.on('mt::handle-renderer-error', (e, error) => {
+  ipcMain.on('mt::handle-renderer-error', (_e, error: Error) => {
     handleError(ERROR_MSG_RENDERER(), error, 'renderer')
   })
 

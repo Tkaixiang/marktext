@@ -89,7 +89,7 @@ class App {
       }
     })
 
-    app.on('open-file', this.openFile) // macOS only
+    app.on('open-file', (event, path) => this.openFile(event, path)) // macOS only
 
     app.on('ready', this.ready)
 
@@ -376,7 +376,7 @@ class App {
     // })
   }
 
-  openFile = (event: Event, pathname: string) => {
+  openFile = (event: Electron.Event, pathname: string) => {
     event.preventDefault()
     const info = normalizeMarkdownPath(pathname)
     if (info) {

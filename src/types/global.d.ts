@@ -1,8 +1,5 @@
 // Global type declarations for MarkText
 
-declare const MARKTEXT_VERSION: string
-declare const MARKTEXT_VERSION_STRING: string
-
 // Window augmentation for preload APIs
 interface Window {
   electron: {
@@ -42,6 +39,9 @@ interface Window {
 
 // Global marktext namespace
 declare global {
+  const MARKTEXT_VERSION: string
+  const MARKTEXT_VERSION_STRING: string
+
   namespace NodeJS {
     interface Global {
       marktext: {
@@ -50,6 +50,8 @@ declare global {
           [key: string]: any
         }
       }
+      __static: string
+      MARKTEXT_IS_STABLE: boolean
     }
   }
 
@@ -59,6 +61,8 @@ declare global {
       [key: string]: any
     }
   }
+  var __static: string
+  var MARKTEXT_IS_STABLE: boolean
 }
 
 declare module 'ced' {

@@ -1112,3 +1112,44 @@ The migration is complete when:
 - [Pinia TypeScript Support](https://pinia.vuejs.org/core-concepts/#typescript)
 - [Electron TypeScript Guide](https://www.electronjs.org/docs/latest/tutorial/typescript)
 - [electron-vite TypeScript](https://electron-vite.org/guide/typescript)
+
+## Current Migration Status
+
+### Phase 0: Preparation and Setup
+- [x] 0.1 Install TypeScript Dependencies
+- [x] 0.2 Install Additional Type Definitions
+- [x] 0.3 Create TypeScript Configuration Files
+- [x] 0.4 Update electron-vite Configuration
+- [x] 0.5 Update package.json Scripts
+- [x] 0.6 Create Global Type Declaration Files
+- [x] 0.7 Update ESLint Configuration
+
+### Phase 1: Create Type Definitions and Interfaces
+- [x] 1.1 Define Core Data Structures
+- [x] 1.2 Define IPC Type Helpers
+
+### Phase 3: Detailed Migration Steps
+
+#### 3.1 Common Module Migration
+- [x] encoding.ts
+- [x] envPaths.ts
+- [x] i18n.ts
+- [x] filesystem/*.ts
+- [x] keybinding/*.ts
+- [x] commands/*.ts
+
+#### 3.2 Preload Script Migration
+- [x] src/preload/index.ts
+
+#### 3.3 Main Process Migration
+- [x] utils/*.ts
+- [x] dataCenter/*.ts
+- [x] filesystem/*.ts
+- [x] windows/*.ts
+- [x] menu/*.ts
+- [x] app/*.ts
+- [x] index.ts
+- [x] config.js -> config.ts
+- [x] exceptionHandler.js -> exceptionHandler.ts
+- [x] globalSetting.js -> globalSetting.ts
+- [x] i18n.js -> i18n.ts
