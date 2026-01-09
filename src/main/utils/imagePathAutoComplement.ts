@@ -8,11 +8,16 @@ import { BLACK_LIST } from '../config'
 
 // TODO(need::refactor): Refactor this file. Just return an array of directories and files without caching and watching?
 
-// TODO: rebuild cache @jocs
-const IMAGE_PATH = new Map()
-export const watchers = new Map()
+interface FileInfo {
+  file: string
+  type: string
+}
 
-const filesHandler = (files, directory, key) => {
+// TODO: rebuild cache @jocs
+const IMAGE_PATH = new Map<string, FileInfo[]>()
+export const watchers = new Map<string, fs.FSWatcher>()
+
+const filesHandler = (files: string[], directory: string, key?: string) => {
   const IMAGE_REG = new RegExp('(' + IMAGE_EXTENSIONS.join('|') + ')$', 'i')
   const onlyDirAndImage = files
     .map(file => {
@@ -42,9 +47,10 @@ const filesHandler = (files, directory, key) => {
       key: 'file'
     })
   }
+  return onlyDirAndImage
 }
 
-const rebuild = (directory) => {
+const rebuild = (directory: string) => {
   fs.readdir(directory, (err, files) => {
     if (err) {
       log.error('imagePathAutoComplement::rebuild:', err)
@@ -54,7 +60,7 @@ const rebuild = (directory) => {
   })
 }
 
-const watchDirectory = directory => {
+const watchDirectory = (directory: string) => {
   if (watchers.has(directory)) return // Do not duplicate watch the same directory
   const watcher = fs.watch(directory, (eventType, filename) => {
     if (eventType === 'rename') {
@@ -64,9 +70,10 @@ const watchDirectory = directory => {
   watchers.set(directory, watcher)
 }
 
-export const searchFilesAndDir = (directory, key) => {
-  let result = []
+export const searchFilesAndDir = (directory: string, key: string): Promise<FileInfo[]> => {
+  let result: FileInfo[] = []
   if (IMAGE_PATH.has(directory)) {
+    // @ts-ignore
     result = filter(IMAGE_PATH.get(directory), key, { key: 'file' })
     return Promise.resolve(result)
   } else {
@@ -75,6 +82,7 @@ export const searchFilesAndDir = (directory, key) => {
         if (err) {
           reject(err)
         } else {
+          // @ts-ignore
           result = filesHandler(files, directory, key)
           watchDirectory(directory)
           resolve(result)

@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { app, Menu, ipcMain } from 'electron'
+import { app, Menu, ipcMain, MenuItem, MenuItemConstructorOptions, BrowserWindow, IpcMainEvent } from 'electron'
 import log from 'electron-log'
 import { ensureDirSync, isDirectory2, isFile2 } from 'common/filesystem'
 import { isLinux, isOsx, isWindows } from '../config'
@@ -20,12 +20,20 @@ export const MenuType = {
 }
 
 class AppMenu {
+  private _preferences: any
+  private _keybindings: any
+  private _userDataPath: string
+  private RECENTS_PATH: string
+  private isOsxOrWindows: boolean
+  private activeWindowId: number
+  private windowMenus: Map<number, { menu: Menu | null; type: number }>
+
   /**
    * @param {Preference} preferences The preferences instances.
    * @param {Keybindings} keybindings The keybindings instances.
    * @param {string} userDataPath The user data path.
    */
-  constructor(preferences, keybindings, userDataPath) {
+  constructor(preferences: any, keybindings: any, userDataPath: string) {
     this._preferences = preferences
     this._keybindings = keybindings
     this._userDataPath = userDataPath
@@ -46,7 +54,7 @@ class AppMenu {
    *
    * @param {string} filePath The file or directory full path.
    */
-  addRecentlyUsedDocument(filePath) {
+  addRecentlyUsedDocument(filePath: string) {
     const { isOsxOrWindows, RECENTS_PATH } = this
 
     if (isOsxOrWindows) app.addRecentDocument(filePath)
@@ -92,7 +100,7 @@ class AppMenu {
 
     try {
       const recentDocuments = JSON.parse(fs.readFileSync(RECENTS_PATH, 'utf-8')).filter(
-        (f) => f && (isFile2(f) || isDirectory2(f))
+        (f: string) => f && (isFile2(f) || isDirectory2(f))
       )
 
       if (recentDocuments.length > MAX_RECENTLY_USED_DOCUMENTS) {
@@ -116,7 +124,7 @@ class AppMenu {
     if (isOsxOrWindows) app.clearRecentDocuments()
     if (isOsx) return
 
-    const recentDocuments = []
+    const recentDocuments: string[] = []
     this.updateAppMenu(recentDocuments)
     const json = JSON.stringify(recentDocuments, null, 2)
     ensureDirSync(this._userDataPath)
@@ -128,7 +136,7 @@ class AppMenu {
    *
    * @param {number} windowId The window id.
    */
-  addDefaultMenu(windowId) {
+  addDefaultMenu(windowId: number) {
     const { windowMenus } = this
     const menu = this._buildSettingMenu() // Setting menu is also the fallback menu.
     windowMenus.set(windowId, menu)
@@ -139,7 +147,7 @@ class AppMenu {
    *
    * @param {BrowserWindow} window The settings browser window.
    */
-  addSettingMenu(window) {
+  addSettingMenu(window: BrowserWindow) {
     const { windowMenus } = this
     const menu = this._buildSettingMenu()
     windowMenus.set(window.id, menu)
@@ -151,22 +159,24 @@ class AppMenu {
    * @param {BrowserWindow} window The editor browser window.
    * @param {[*]} options The menu options.
    */
-  addEditorMenu(window, options = {}) {
+  addEditorMenu(window: BrowserWindow, options: any = {}) {
     const isSourceMode = !!options.sourceCodeModeEnabled
     const { windowMenus } = this
     windowMenus.set(window.id, this._buildEditorMenu())
 
-    const { menu } = windowMenus.get(window.id)
+    const entry = windowMenus.get(window.id)
+    if (!entry || !entry.menu) return
+    const { menu } = entry
 
     // Set source-code editor if preferred.
     const sourceCodeModeMenuItem = menu.getMenuItemById('sourceCodeModeMenuItem')
-    sourceCodeModeMenuItem.checked = isSourceMode
+    if (sourceCodeModeMenuItem) sourceCodeModeMenuItem.checked = isSourceMode
 
     if (isSourceMode) {
       const typewriterModeMenuItem = menu.getMenuItemById('typewriterModeMenuItem')
       const focusModeMenuItem = menu.getMenuItemById('focusModeMenuItem')
-      typewriterModeMenuItem.enabled = false
-      focusModeMenuItem.enabled = false
+      if (typewriterModeMenuItem) typewriterModeMenuItem.enabled = false
+      if (focusModeMenuItem) focusModeMenuItem.enabled = false
     }
 
     const { _keybindings } = this
@@ -175,7 +185,7 @@ class AppMenu {
     if (isWindows) {
       // WORKAROUND: Window close event isn't triggered on Windows if `setIgnoreMenuShortcuts(true)` is used (Electron#32674).
       // NB: Remove this immediately if upstream is fixed because the event may be emitted twice.
-      _keybindings.registerAccelerator(window, 'Alt+F4', (win) => {
+      _keybindings.registerAccelerator(window, 'Alt+F4', (win: BrowserWindow) => {
         if (win && !win.isDestroyed()) {
           win.close()
         }
@@ -188,7 +198,7 @@ class AppMenu {
    *
    * @param {number} windowId The window id.
    */
-  removeWindowMenu(windowId) {
+  removeWindowMenu(windowId: number) {
     // NOTE: Shortcut handler is automatically unregistered when window is closed.
     const { activeWindowId } = this
     this.windowMenus.delete(windowId)
@@ -203,9 +213,9 @@ class AppMenu {
    * @param {number} windowId The window id.
    * @returns {Electron.Menu} The menu.
    */
-  getWindowMenuById(windowId) {
+  getWindowMenuById(windowId: number) {
     const menu = this.windowMenus.get(windowId)
-    if (!menu) {
+    if (!menu || !menu.menu) {
       log.error(`getWindowMenuById: Cannot find window menu for window id ${windowId}.`)
       throw new Error(`Cannot find window menu for id ${windowId}.`)
     }
@@ -217,7 +227,7 @@ class AppMenu {
    *
    * @param {number} windowId The window id.
    */
-  has(windowId) {
+  has(windowId: number) {
     return this.windowMenus.has(windowId)
   }
 
@@ -226,7 +236,7 @@ class AppMenu {
    *
    * @param {number} windowId The window id.
    */
-  setActiveWindow(windowId) {
+  setActiveWindow(windowId: number) {
     if (this.activeWindowId !== windowId) {
       // Change application menu to the current window menu.
       this._setApplicationMenu(this.getWindowMenuById(windowId))
@@ -241,7 +251,7 @@ class AppMenu {
    *
    * @param {[string[]]} recentUsedDocuments
    */
-  updateAppMenu(recentUsedDocuments) {
+  updateAppMenu(recentUsedDocuments?: string[]) {
     if (!recentUsedDocuments) {
       recentUsedDocuments = this.getRecentlyUsedDocuments()
     }
@@ -253,7 +263,7 @@ class AppMenu {
     // rebuild all window menus
     this.windowMenus.forEach((value, key) => {
       const { menu: oldMenu, type } = value
-      if (type !== MenuType.EDITOR) return
+      if (type !== MenuType.EDITOR || !oldMenu) return
 
       const { menu: newMenu } = this._buildEditorMenu(recentUsedDocuments)
 
@@ -281,14 +291,14 @@ class AppMenu {
    * @param {number} windowId The window id.
    * @param {string} lineEnding Either >lf< or >crlf<.
    */
-  updateLineEndingMenu(windowId, lineEnding) {
+  updateLineEndingMenu(windowId: number, lineEnding: string) {
     const menus = this.getWindowMenuById(windowId)
     const crlfMenu = menus.getMenuItemById('crlfLineEndingMenuEntry')
     const lfMenu = menus.getMenuItemById('lfLineEndingMenuEntry')
     if (lineEnding === 'crlf') {
-      crlfMenu.checked = true
+      if (crlfMenu) crlfMenu.checked = true
     } else {
-      lfMenu.checked = true
+      if (lfMenu) lfMenu.checked = true
     }
   }
 
@@ -298,24 +308,24 @@ class AppMenu {
    * @param {number} windowId The window id.
    * @param {boolean} lineEnding Always on top.
    */
-  updateAlwaysOnTopMenu(windowId, flag) {
+  updateAlwaysOnTopMenu(windowId: number, flag: boolean) {
     const menus = this.getWindowMenuById(windowId)
     const menu = menus.getMenuItemById('alwaysOnTopMenuItem')
-    menu.checked = flag
+    if (menu) menu.checked = flag
   }
 
   /**
    * Update all theme entries from editor menus to the selected one.
    */
-  updateThemeMenu = (theme) => {
+  updateThemeMenu = (theme: string) => {
     this.windowMenus.forEach((value) => {
       const { menu, type } = value
-      if (type !== MenuType.EDITOR) {
+      if (type !== MenuType.EDITOR || !menu) {
         return
       }
 
       const themeMenus = menu.getMenuItemById('themeMenu')
-      if (!themeMenus) {
+      if (!themeMenus || !themeMenus.submenu) {
         return
       }
 
@@ -331,10 +341,10 @@ class AppMenu {
   /**
    * Update all auto save entries from editor menus to the given state.
    */
-  updateAutoSaveMenu = (autoSave) => {
+  updateAutoSaveMenu = (autoSave: boolean) => {
     this.windowMenus.forEach((value) => {
       const { menu, type } = value
-      if (type !== MenuType.EDITOR) {
+      if (type !== MenuType.EDITOR || !menu) {
         return
       }
 
@@ -346,28 +356,34 @@ class AppMenu {
     })
   }
 
-  _buildEditorMenu(recentUsedDocuments = null) {
+  _buildEditorMenu(recentUsedDocuments: string[] | null = null) {
     if (!recentUsedDocuments) {
       recentUsedDocuments = this.getRecentlyUsedDocuments()
     }
 
+    // @ts-ignore
     const menuTemplate = configureMenu(this._keybindings, this._preferences, recentUsedDocuments)
+    // @ts-ignore
     const menu = Menu.buildFromTemplate(menuTemplate)
     return { menu, type: MenuType.EDITOR }
   }
 
   _buildSettingMenu() {
     if (isOsx) {
+      // @ts-ignore
       const menuTemplate = configSettingMenu(this._keybindings)
+      // @ts-ignore
       const menu = Menu.buildFromTemplate(menuTemplate)
       return { menu, type: MenuType.SETTINGS }
     }
+    // @ts-ignore
     return { menu: null, type: MenuType.SETTINGS }
   }
 
-  _setApplicationMenu(menu) {
+  _setApplicationMenu(menu: Menu) {
     if (isLinux && !menu) {
       // WORKAROUND for Electron#16521: We cannot hide the (application) menu on Linux.
+      // @ts-ignore
       const dummyMenu = Menu.buildFromTemplate([])
       Menu.setApplicationMenu(dummyMenu)
     } else {
@@ -426,14 +442,14 @@ class AppMenu {
       updateSelectionMenus(this.getWindowMenuById(windowId), changes)
     })
 
-    ipcMain.on('menu-add-recently-used', (pathname) => {
+    ipcMain.on('menu-add-recently-used', (event: IpcMainEvent, pathname: string) => {
       this.addRecentlyUsedDocument(pathname)
     })
     ipcMain.on('menu-clear-recently-used', () => {
       this.clearRecentlyUsedDocuments()
     })
 
-    ipcMain.on('broadcast-preferences-changed', async (prefs) => {
+    ipcMain.on('broadcast-preferences-changed', async (event: IpcMainEvent, prefs: any) => {
       if (prefs.theme !== undefined) {
         this.updateThemeMenu(prefs.theme)
       }
@@ -450,10 +466,12 @@ class AppMenu {
   }
 }
 
-const updateMenuItem = (oldMenus, newMenus, id) => {
+const updateMenuItem = (oldMenus: Menu, newMenus: Menu, id: string) => {
   const oldItem = oldMenus.getMenuItemById(id)
   const newItem = newMenus.getMenuItemById(id)
-  newItem.checked = oldItem.checked
+  if (oldItem && newItem) {
+    newItem.checked = oldItem.checked
+  }
 }
 
 // ----------------------------------------------
@@ -467,9 +485,12 @@ const updateMenuItem = (oldMenus, newMenus, id) => {
  * @param {string} menuId Menu ID
  * @returns {Electron.Menu} Returns the menu or null.
  */
-export const getMenuItemById = (menuId) => {
+export const getMenuItemById = (menuId: string) => {
   const menus = Menu.getApplicationMenu()
-  return menus.getMenuItemById(menuId)
+  if (menus) {
+    return menus.getMenuItemById(menuId)
+  }
+  return null
 }
 
 export default AppMenu

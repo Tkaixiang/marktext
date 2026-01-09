@@ -9,7 +9,7 @@ import { ensureDirSync as fsExtraEnsureDirSync, pathExistsSync } from 'fs-extra'
  * @param {string} p The path to the file or directory.
  * @returns {boolean}
  */
-export const exists = async (p) => {
+export const exists = async (p: string): Promise<boolean> => {
   try {
     await access(p)
     return true
@@ -23,10 +23,10 @@ export const exists = async (p) => {
  *
  * @param {string} dirPath The directory path.
  */
-export const ensureDirSync = (dirPath) => {
+export const ensureDirSync = (dirPath: string): void => {
   try {
     fsExtraEnsureDirSync(dirPath)
-  } catch (e) {
+  } catch (e: any) {
     if (e.code !== 'EEXIST') {
       throw e
     }
@@ -38,7 +38,7 @@ export const ensureDirSync = (dirPath) => {
  *
  * @param {string} dirPath The directory path.
  */
-export const isDirectory = (dirPath) => {
+export const isDirectory = (dirPath: string): boolean => {
   try {
     return pathExistsSync(dirPath) && lstatSync(dirPath).isDirectory()
   } catch {
@@ -51,7 +51,7 @@ export const isDirectory = (dirPath) => {
  *
  * @param {string} dirPath The directory path.
  */
-export const isDirectory2 = (dirPath) => {
+export const isDirectory2 = (dirPath: string): boolean => {
   try {
     if (!pathExistsSync(dirPath)) {
       return false
@@ -75,7 +75,7 @@ export const isDirectory2 = (dirPath) => {
  *
  * @param {string} filepath The file path.
  */
-export const isFile = (filepath) => {
+export const isFile = (filepath: string): boolean => {
   try {
     return pathExistsSync(filepath) && lstatSync(filepath).isFile()
   } catch {
@@ -88,7 +88,7 @@ export const isFile = (filepath) => {
  *
  * @param {string} filepath The file path.
  */
-export const isFile2 = (filepath) => {
+export const isFile2 = (filepath: string): boolean => {
   try {
     if (!pathExistsSync(filepath)) {
       return false
@@ -112,7 +112,7 @@ export const isFile2 = (filepath) => {
  *
  * @param {string} filepath The link path.
  */
-export const isSymbolicLink = (filepath) => {
+export const isSymbolicLink = (filepath: string): boolean => {
   try {
     return pathExistsSync(filepath) && lstatSync(filepath).isSymbolicLink()
   } catch {

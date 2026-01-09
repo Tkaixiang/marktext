@@ -25,27 +25,27 @@ const customElectronAPI = {
 }
 
 const fileUtilsAPI = {
-  isFile: (path) => isFile(path),
-  isDirectory: (path) => isDirectory(path),
-  emptyDir: (path) => fs.emptyDir(path),
-  copy: (src, dest) => fs.copy(src, dest),
-  ensureDir: (path) => fs.ensureDir(path),
-  outputFile: (path, data) => fs.outputFile(path, data),
-  move: (src, dest) => fs.move(src, dest),
-  stat: (path) => fs.stat(path),
-  writeFile: (path, data) => fs.writeFile(path, data),
-  readFile: (path) => fs.readFile(path),
-  ensureDirSync: (path) => ensureDirSync(path),
-  pathExistsSync: (path) => fs.pathExistsSync(path),
-  isChildOfDirectory: (dir, child) => isChildOfDirectory(dir, child),
-  hasMarkdownExtension: (filename) => hasMarkdownExtension(filename),
+  isFile: (path: string) => isFile(path),
+  isDirectory: (path: string) => isDirectory(path),
+  emptyDir: (path: string) => fs.emptyDir(path),
+  copy: (src: string, dest: string) => fs.copy(src, dest),
+  ensureDir: (path: string) => fs.ensureDir(path),
+  outputFile: (path: string, data: any) => fs.outputFile(path, data),
+  move: (src: string, dest: string) => fs.move(src, dest),
+  stat: (path: string) => fs.stat(path),
+  writeFile: (path: string, data: any) => fs.writeFile(path, data),
+  readFile: (path: string) => fs.readFile(path),
+  ensureDirSync: (path: string) => ensureDirSync(path),
+  pathExistsSync: (path: string) => fs.pathExistsSync(path),
+  isChildOfDirectory: (dir: string, child: string) => isChildOfDirectory(dir, child),
+  hasMarkdownExtension: (filename: string) => hasMarkdownExtension(filename),
   MARKDOWN_INCLUSIONS,
-  isSamePathSync: (pathA, pathB) => isSamePathSync(pathA, pathB),
-  isImageFile: (filepath) => isImageFile(filepath)
+  isSamePathSync: (pathA: string, pathB: string) => isSamePathSync(pathA, pathB),
+  isImageFile: (filepath: string) => isImageFile(filepath)
 }
 
 const commandAPI = {
-  exists: (command) => {
+  exists: (command: string) => {
     try {
       // 先尝试使用 command-exists 检查
       if (commandExists.sync(command)) {
@@ -96,10 +96,16 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
+  // @ts-ignore (define in dts)
   window.electron = { ...electronAPI, ...customElectronAPI }
+  // @ts-ignore (define in dts)
   window.rgPath = rgPath
+  // @ts-ignore (define in dts)
   window.fileUtils = fileUtilsAPI
+  // @ts-ignore (define in dts)
   window.path = path
+  // @ts-ignore (define in dts)
   window.commandExists = commandAPI
+  // @ts-ignore (define in dts)
   window.i18nUtils = i18nUtils
 }

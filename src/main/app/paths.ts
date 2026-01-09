@@ -8,7 +8,7 @@ class AppPaths extends EnvPaths {
    *
    * @param {[string]} userDataPath The user data path or null.
    */
-  constructor(userDataPath = '') {
+  constructor(userDataPath: string = '') {
     if (!userDataPath) {
       // Use default user data path.
       userDataPath = app.getPath('userData')
@@ -18,11 +18,12 @@ class AppPaths extends EnvPaths {
     super(userDataPath)
 
     // Changing the user data directory is only allowed during application bootstrap.
+    // @ts-ignore
     app.setPath('userData', this._electronUserDataPath)
   }
 }
 
-export const ensureAppDirectoriesSync = (paths) => {
+export const ensureAppDirectoriesSync = (paths: AppPaths) => {
   ensureDirSync(paths.userDataPath)
   ensureDirSync(paths.logPath)
   // TODO(sessions): enable this...

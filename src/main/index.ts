@@ -14,28 +14,32 @@ import App from './app'
 import { t } from './i18n'
 
 // Set version strings into global and process.versions
+// @ts-ignore
 process.env.MARKTEXT_VERSION = MARKTEXT_VERSION
+// @ts-ignore
 process.env.MARKTEXT_VERSION_STRING = MARKTEXT_VERSION_STRING
 
 // -----------------------------------------------
 // Exception handling and logging setup
 setupExceptionHandler()
+// @ts-ignore
 const args = cli()
 const appEnvironment = setupEnvironment(args)
 
-const initializeLogger = (env) => {
+const initializeLogger = (env: any) => {
   log.initialize() // allows listening for logs from the renderer process
   log.transports.console.level = process.env.NODE_ENV === 'development' ? 'info' : 'error'
-  log.transports.file.resolvePathFn = (variables) => {
+  log.transports.file.resolvePathFn = (variables: any) => {
     if (variables.browserWindow && variables.browserWindow.id) {
       return path.join(env.paths.logPath, `renderer-${variables.browserWindow.id}.log`)
     }
     return path.join(env.paths.logPath, 'main.log')
   }
+  // @ts-ignore
   log.transports.file.level = getLogLevel()
   log.transports.file.sync = true
   log.errorHandler.startCatching({
-    onError(error) {
+    onError(error: any) {
       // This callback receives the full Error object with stack
       log.error('Uncaught Exception:', error.stack)
     }
@@ -52,10 +56,10 @@ crashReporter.start({
   uploadToServer: false, // collect locally
   compress: true
 })
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', (err: any) => {
   log.error('Main uncaughtException:', err.stack)
 })
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', (reason: any) => {
   log.error('Main unhandledRejection:', reason)
 })
 
@@ -89,7 +93,7 @@ app.on('browser-window-created', (_, window) => {
 let accessor
 try {
   accessor = new Accessor(appEnvironment)
-} catch (err) {
+} catch (err: any) {
   const msgHint = err.message.includes('Config schema violation')
     ? t('error.configSchemaViolation')
     : ''

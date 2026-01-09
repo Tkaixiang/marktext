@@ -4,13 +4,21 @@ import AppPaths, { ensureAppDirectoriesSync } from './paths'
 let envId = 0
 
 const patchEnvPath = () => {
-  if (process.platform === 'darwin') {
+  if (process.platform === 'darwin' && process.env.PATH) {
     process.env.PATH += (process.env.PATH.endsWith(path.delimiter) ? '' : path.delimiter) + '/Library/TeX/texbin'
   }
 }
 
 export class AppEnvironment {
-  constructor (options) {
+  private _id: number
+  private _appPaths: AppPaths
+  private _debug: boolean
+  private _isDevMode: boolean
+  private _verbose: boolean
+  private _safeMode: boolean
+  private _disableSpellcheck: boolean
+
+  constructor (options: any) {
     this._id = envId++
     this._appPaths = new AppPaths(options.userDataPath)
     this._debug = !!options.debug
@@ -78,7 +86,7 @@ export class AppEnvironment {
  * @param {arg.Result} args The parsed application arguments.
  * @returns {AppEnvironment} The current (global) environment.
  */
-const setupEnvironment = args => {
+const setupEnvironment = (args: any): AppEnvironment => {
   patchEnvPath()
 
   const isDevMode = process.env.NODE_ENV !== 'production'
@@ -100,8 +108,11 @@ const setupEnvironment = args => {
   ensureAppDirectoriesSync(appEnvironment.paths)
 
   // Keep this for easier access.
+  // @ts-ignore
   global.MARKTEXT_DEBUG = debug
+  // @ts-ignore
   global.MARKTEXT_DEBUG_VERBOSE = verbose
+  // @ts-ignore
   global.MARKTEXT_SAFE_MODE = safeMode
 
   return appEnvironment

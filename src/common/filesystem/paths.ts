@@ -28,7 +28,7 @@ export const IMAGE_EXTENSIONS = Object.freeze(['jpeg', 'jpg', 'png', 'gif', 'svg
  *
  * @param {string} filename Path or filename
  */
-export const hasMarkdownExtension = (filename) => {
+export const hasMarkdownExtension = (filename: string): boolean => {
   if (!filename || typeof filename !== 'string') return false
   return MARKDOWN_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(`.${ext}`))
 }
@@ -38,7 +38,7 @@ export const hasMarkdownExtension = (filename) => {
  *
  * @param {string} filepath The path
  */
-export const isImageFile = (filepath) => {
+export const isImageFile = (filepath: string): boolean => {
   const extname = path.extname(filepath)
   return (
     isFile(filepath) &&
@@ -54,7 +54,7 @@ export const isImageFile = (filepath) => {
  *
  * @param {string} filepath The path or link path.
  */
-export const isMarkdownFile = (filepath) => {
+export const isMarkdownFile = (filepath: string): boolean => {
   if (!isFile2(filepath)) return false
 
   // Check symbolic link.
@@ -72,7 +72,7 @@ export const isMarkdownFile = (filepath) => {
  * @param {string} pathB The second path.
  * @param {boolean} [isNormalized] Are both paths already normalized.
  */
-export const isSamePathSync = (pathA, pathB, isNormalized = false) => {
+export const isSamePathSync = (pathA: string, pathB: string, isNormalized = false): boolean => {
   if (!pathA || !pathB) return false
   const a = isNormalized ? pathA : path.normalize(pathA)
   const b = isNormalized ? pathB : path.normalize(pathB)
@@ -98,13 +98,13 @@ export const isSamePathSync = (pathA, pathB, isNormalized = false) => {
  * @param {string} dir The parent directory.
  * @param {string} child The file or directory path to check.
  */
-export const isChildOfDirectory = (dir, child) => {
+export const isChildOfDirectory = (dir: string, child: string): boolean => {
   if (!dir || !child) return false
   const relative = path.relative(dir, child)
-  return relative && !relative.startsWith('..') && !path.isAbsolute(relative)
+  return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative)
 }
 
-export const getResourcesPath = () => {
+export const getResourcesPath = (): string => {
   let resPath = process.resourcesPath
   if (process.env.NODE_ENV === 'development') {
     // Default locations:
@@ -124,7 +124,7 @@ export const getResourcesPath = () => {
  * @param {string} pathname Path of file or directory
  * @param {string} patterns Glob expressions
  */
-export const checkPathExcludePattern = (pathname, patterns) => {
+export const checkPathExcludePattern = (pathname: string, patterns: string[]): boolean => {
   if (!pathname || typeof pathname !== 'string') return false
   for (const pattern of patterns) {
     if (minimatch(pathname, pattern, { matchBase: true })) {
