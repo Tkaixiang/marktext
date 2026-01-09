@@ -89,7 +89,7 @@ export const loadFormatCommands = commandManager => {
 /**
  * Update format menu entires from given state.
  *
- * @param {Electron.MenuItem} applicationMenu The application menu instance.
+ * @param {Electron.Menu} applicationMenu The application menu instance.
  * @param {Object.<string, boolean>} formats A object map with selected formats.
  */
 export const updateFormatMenu = (applicationMenu, formats) => {

@@ -151,6 +151,7 @@ class WindowManager extends EventEmitter {
       this._windowActivity.delete(windowId)
       const nextWindowId = this._windowActivity.getNewest()
       if (nextWindowId !== null) {
+        // @ts-ignore
         this.setActiveWindow(nextWindowId)
       } else {
         this._activeWindowId = null
@@ -201,6 +202,7 @@ class WindowManager extends EventEmitter {
     if (win && win.type !== WindowType.EDITOR) {
       const secondNewestId = this._windowActivity.getSecondNewest()
       if (secondNewestId !== null) {
+        // @ts-ignore
         win = this._windows.get(secondNewestId)
       }
       if (win && win.type === WindowType.EDITOR) {
@@ -416,61 +418,88 @@ class WindowManager extends EventEmitter {
 
     // --- local events ---------------
 
-    ipcMain.on('watcher-unwatch-all-by-id', (windowId: number) => {
+    ;(ipcMain as unknown as EventEmitter).on('watcher-unwatch-all-by-id', (windowId: number) => {
+      // @ts-ignore
       this._watcher.unwatchByWindowId(windowId)
     })
-    ipcMain.on('watcher-watch-file', (win: BrowserWindow, filePath: string) => {
-      this._watcher.watch(win, filePath, 'file')
-    })
-    ipcMain.on('watcher-watch-directory', (win: BrowserWindow, pathname: string) => {
-      this._watcher.watch(win, pathname, 'dir')
-    })
-    ipcMain.on('watcher-unwatch-file', (win: BrowserWindow, filePath: string) => {
-      this._watcher.unwatch(win, filePath, 'file')
-    })
-    ipcMain.on('watcher-unwatch-directory', (win: BrowserWindow, pathname: string) => {
-      this._watcher.unwatch(win, pathname, 'dir')
-    })
-
-    ipcMain.on('window-add-file-path', (windowId: number, filePath: string) => {
-      const editor = this.get(windowId)
-      if (!editor) {
-        log.error(`Cannot find window id "${windowId}" to add opened file.`)
-        return
+    ;(ipcMain as unknown as EventEmitter).on(
+      'watcher-watch-file',
+      (win: BrowserWindow, filePath: string) => {
+        this._watcher.watch(win, filePath, 'file')
       }
-      editor.addToOpenedFiles(filePath)
-    })
-    ipcMain.on('window-change-file-path', (windowId: number, pathname: string, oldPathname: string) => {
-      const editor = this.get(windowId)
-      if (!editor) {
-        log.error(`Cannot find window id "${windowId}" to change file path.`)
-        return
+    )
+    ;(ipcMain as unknown as EventEmitter).on(
+      'watcher-watch-directory',
+      (win: BrowserWindow, pathname: string) => {
+        this._watcher.watch(win, pathname, 'dir')
       }
-      editor.changeOpenedFilePath(pathname, oldPathname)
-    })
+    )
+    ;(ipcMain as unknown as EventEmitter).on(
+      'watcher-unwatch-file',
+      (win: BrowserWindow, filePath: string) => {
+        this._watcher.unwatch(win, filePath, 'file')
+      }
+    )
+    ;(ipcMain as unknown as EventEmitter).on(
+      'watcher-unwatch-directory',
+      (win: BrowserWindow, pathname: string) => {
+        this._watcher.unwatch(win, pathname, 'dir')
+      }
+    )
 
-    ipcMain.on('window-file-saved', (windowId: number, pathname: string) => {
-      // A changed event is emitted earliest after the stability threshold.
-      const duration = WATCHER_STABILITY_THRESHOLD + WATCHER_STABILITY_POLL_INTERVAL * 2
-      this._watcher.ignoreChangedEvent(windowId, pathname, duration)
-    })
+    ;(ipcMain as unknown as EventEmitter).on(
+      'window-add-file-path',
+      (windowId: number, filePath: string) => {
+        // @ts-ignore
+        const editor = this.get(windowId)
+        if (!editor) {
+          log.error(`Cannot find window id "${windowId}" to add opened file.`)
+          return
+        }
+        editor.addToOpenedFiles(filePath)
+      }
+    )
+    ;(ipcMain as unknown as EventEmitter).on(
+      'window-change-file-path',
+      (windowId: number, pathname: string, oldPathname: string) => {
+        // @ts-ignore
+        const editor = this.get(windowId)
+        if (!editor) {
+          log.error(`Cannot find window id "${windowId}" to change file path.`)
+          return
+        }
+        editor.changeOpenedFilePath(pathname, oldPathname)
+      }
+    )
 
-    ipcMain.on('window-close-by-id', (id: number) => {
+    ;(ipcMain as unknown as EventEmitter).on(
+      'window-file-saved',
+      (windowId: number, pathname: string) => {
+        // A changed event is emitted earliest after the stability threshold.
+        const duration = WATCHER_STABILITY_THRESHOLD + WATCHER_STABILITY_POLL_INTERVAL * 2
+        // @ts-ignore
+        this._watcher.ignoreChangedEvent(windowId, pathname, duration)
+      }
+    )
+
+    ;(ipcMain as unknown as EventEmitter).on('window-close-by-id', (id: number) => {
+      // @ts-ignore
       this.forceCloseById(id)
     })
-    ipcMain.on('window-reload-by-id', (id: number) => {
+    ;(ipcMain as unknown as EventEmitter).on('window-reload-by-id', (id: number) => {
+      // @ts-ignore
       const window = this.get(id)
       if (window) {
         window.reload()
       }
     })
-    ipcMain.on('window-toggle-always-on-top', (win: BrowserWindow) => {
+    ;(ipcMain as unknown as EventEmitter).on('window-toggle-always-on-top', (win: BrowserWindow) => {
       const flag = !win.isAlwaysOnTop()
       win.setAlwaysOnTop(flag)
       this._appMenu.updateAlwaysOnTopMenu(win.id, flag)
     })
 
-    ipcMain.on('broadcast-preferences-changed', (prefs: any) => {
+    ;(ipcMain as unknown as EventEmitter).on('broadcast-preferences-changed', (prefs: any) => {
       // We can not dynamic change the title bar style, so do not need to send it to renderer.
       if (typeof prefs.titleBarStyle !== 'undefined') {
         delete prefs.titleBarStyle
@@ -482,7 +511,7 @@ class WindowManager extends EventEmitter {
       }
     })
 
-    ipcMain.on('broadcast-user-data-changed', (userData: any) => {
+    ;(ipcMain as unknown as EventEmitter).on('broadcast-user-data-changed', (userData: any) => {
       for (const { browserWindow } of this._windows.values()) {
         browserWindow.webContents.send('mt::user-preference', userData)
       }

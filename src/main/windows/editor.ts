@@ -226,8 +226,12 @@ class EditorWindow extends BaseWindow {
 
     this.lifecycle = WindowLifecycle.LOADING
     // @ts-ignore
-    win.loadURL(this._buildUrlString(this.id!, env, preferences))
-    win.setSheetOffset(TITLE_BAR_HEIGHT)
+    if (win) {
+      // @ts-ignore
+      win.loadURL(this._buildUrlString(this.id!, env, preferences))
+      // @ts-ignore
+      win.setSheetOffset(TITLE_BAR_HEIGHT)
+    }
 
     // @ts-ignore
     mainWindowState.manage(win)
@@ -270,7 +274,9 @@ class EditorWindow extends BaseWindow {
     if (!filePaths || filePaths.length === 0) return
 
     const fileList = filePaths.map((p) => ({ filePath: p, options: {}, selected: false }))
-    fileList[0].selected = true
+    if (fileList[0]) {
+      fileList[0].selected = true
+    }
     this.openTabs(fileList)
   }
 

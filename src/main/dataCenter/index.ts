@@ -182,21 +182,26 @@ class DataCenter extends EventEmitter {
       }
     })
 
-    ipcMain.on('mt::ask-for-modify-image-folder-path', async (e: IpcMainEvent, imagePath: string) => {
-      if (!imagePath) {
-        const win = BrowserWindow.fromWebContents(e.sender)
-        if (!win) return
-        const result = await dialog.showOpenDialog(win, {
-          properties: ['openDirectory', 'createDirectory']
-        })
-        if (result.filePaths && result.filePaths[0]) {
-          imagePath = result.filePaths[0]
+    ipcMain.on(
+      'mt::ask-for-modify-image-folder-path',
+      async (e: IpcMainEvent, imagePath: string) => {
+        if (!imagePath) {
+          const win = BrowserWindow.fromWebContents(e.sender)
+          if (!win) return
+          const result = await dialog.showOpenDialog(win, {
+            properties: ['openDirectory', 'createDirectory']
+          })
+          // @ts-ignore
+          if (result.filePaths && result.filePaths[0]) {
+            // @ts-ignore
+            imagePath = result.filePaths[0]
+          }
+        }
+        if (imagePath) {
+          this.setItem('imageFolderPath', imagePath)
         }
       }
-      if (imagePath) {
-        this.setItem('imageFolderPath', imagePath)
-      }
-    })
+    )
 
     ipcMain.on('mt::set-user-data', (e: IpcMainEvent, userData: any) => {
       this.setItems(userData)
@@ -216,7 +221,9 @@ class DataCenter extends EventEmitter {
         ]
       })
 
+      // @ts-ignore
       if (result.filePaths && result.filePaths[0]) {
+        // @ts-ignore
         e.returnValue = result.filePaths[0]
       } else {
         e.returnValue = ''

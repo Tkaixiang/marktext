@@ -97,7 +97,7 @@ export const loadViewCommands = (commandManager) => {
 
 /**
  *
- * @param {*} applicationMenu The application menu instance.
+ * @param {Electron.Menu} applicationMenu The application menu instance.
  * @param {*} changes Array of changed view settings (e.g. [ {showSideBar: true} ]).
  */
 export const viewLayoutChanged = (applicationMenu, changes) => {

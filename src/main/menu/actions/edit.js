@@ -148,6 +148,10 @@ export const loadEditCommands = (commandManager) => {
 // NOTE: Don't use static `getMenuItemById` here, instead request the menu by
 //       window id from `AppMenu` manager.
 
+/**
+ * @param {Electron.Menu} applicationMenu
+ * @param {boolean} value
+ */
 export const updateSidebarMenu = (applicationMenu, value) => {
   const sideBarMenuItem = applicationMenu.getMenuItemById('sideBarMenuItem')
   sideBarMenuItem.checked = !!value

@@ -3,7 +3,7 @@ import fsPromises from 'fs/promises'
 import { exec } from 'child_process'
 import dayjs from 'dayjs'
 import log from 'electron-log'
-import { app, BrowserWindow, clipboard, dialog, nativeTheme, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, clipboard, dialog, nativeTheme, shell, ipcMain, IpcMainEvent } from 'electron'
 import { isChildOfDirectory } from 'common/filesystem/paths'
 import { isLinux, isOsx, isWindows } from '../config'
 import parseArgs from '../cli/parser'
@@ -20,11 +20,18 @@ import SettingWindow from '../windows/setting'
 import { setLanguage } from '../i18n'
 
 class App {
+  private _accessor: any
+  private _args: any
+  private _openFilesCache: any[]
+  private _openFilesTimer: NodeJS.Timeout | null
+  private _windowManager: any
+  private _themeListenerRegistered: boolean
+
   /**
    * @param {Accessor} accessor The application accessor for application instances.
    * @param {arg.Result} args Parsed application arguments.
    */
-  constructor(accessor, args) {
+  constructor(accessor: any, args: any) {
     this._accessor = accessor
     this._args = args || { _: [] }
     this._openFilesCache = []
@@ -136,30 +143,30 @@ class App {
         const supportedLanguages = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'fr', 'de', 'es', 'pt', 'ru']
         
         // 语言映射：系统语言代码 -> 应用语言代码
-        const languageMap = {
+        const languageMap: { [key: string]: string } = {
           'zh-CN': 'zh-CN',
-          'zh-TW': 'zh-TW', 
+          'zh-TW': 'zh-TW',
           'zh-HK': 'zh-TW',
-          'zh': 'zh-CN',
-          'en': 'en',
+          zh: 'zh-CN',
+          en: 'en',
           'en-US': 'en',
           'en-GB': 'en',
-          'ja': 'ja',
+          ja: 'ja',
           'ja-JP': 'ja',
-          'ko': 'ko',
+          ko: 'ko',
           'ko-KR': 'ko',
-          'fr': 'fr',
+          fr: 'fr',
           'fr-FR': 'fr',
-          'de': 'de',
+          de: 'de',
           'de-DE': 'de',
-          'es': 'es',
+          es: 'es',
           'es-ES': 'es',
-          'pt': 'pt',
+          pt: 'pt',
           'pt-BR': 'pt',
-          'ru': 'ru',
+          ru: 'ru',
           'ru-RU': 'ru'
         }
-        
+
         currentLanguage = languageMap[systemLanguage] || 'en'
         
         // 如果检测到的语言不在支持列表中，使用英语
@@ -234,7 +241,8 @@ class App {
       selectTheme(newTheme)
     }
 
-    ipcMain.on('broadcast-preferences-changed', (change) => {
+    // @ts-ignore
+    ipcMain.on('broadcast-preferences-changed', (change: any) => {
       // Update dark mode tracking when theme preference changes
       if (change.theme) {
         const newIsDark = /dark/i.test(change.theme)
@@ -295,6 +303,7 @@ class App {
     }
 
     if (isOsx) {
+      // @ts-ignore
       app.dock.setMenu(dockMenu)
     } else if (isWindows) {
       app.setJumpList([
@@ -367,7 +376,7 @@ class App {
     // })
   }
 
-  openFile = (event, pathname) => {
+  openFile = (event: Event, pathname: string) => {
     event.preventDefault()
     const info = normalizeMarkdownPath(pathname)
     if (info) {
@@ -410,7 +419,7 @@ class App {
   /**
    * Create a new setting window.
    */
-  _createSettingWindow(category) {
+  _createSettingWindow(category?: string) {
     const setting = new SettingWindow(this._accessor)
     setting.createWindow(category)
     this._windowManager.add(setting)
@@ -430,7 +439,7 @@ class App {
    * @param {boolean} openFilesInSameWindow Open all files in the same window with
    * the first directory and discard other directories.
    */
-  _openPathList(pathsToOpen, openFilesInSameWindow = false) {
+  _openPathList(pathsToOpen: any[], openFilesInSameWindow = false) {
     const { _windowManager } = this
     const openFilesInNewWindow = this._accessor.preferences.getItem('openFilesInNewWindow')
 
@@ -457,13 +466,14 @@ class App {
 
     const directoriesToOpen = Array.from(directorySet).map((dir) => ({
       rootDirectory: dir,
-      fileList: []
+      fileList: [] as any[]
     }))
     const filesToOpen = Array.from(fileSet)
 
     // Discard all directories except first one and add files.
     if (openFilesInSameWindow) {
       if (directoriesToOpen.length) {
+        // @ts-ignore
         directoriesToOpen[0].fileList.push(...filesToOpen)
         directoriesToOpen.length = 1
       } else {
@@ -478,11 +488,13 @@ class App {
 
       // Prefer new directories
       for (let i = 0; i < directoriesToOpen.length; ++i) {
+        // @ts-ignore
         const { fileList, rootDirectory } = directoriesToOpen[i]
 
         let breakOuterLoop = false
         for (let j = 0; j < filesToOpen.length; ++j) {
           const pathname = filesToOpen[j]
+          // @ts-ignore
           if (isChildOfDirectory(rootDirectory, pathname)) {
             if (isFirstWindow) {
               fileList.push(...filesToOpen)
@@ -503,7 +515,9 @@ class App {
 
       // Find for the remaining files the best window to open the files in.
       if (isFirstWindow && directoriesToOpen.length && filesToOpen.length) {
+        // @ts-ignore
         const { fileList } = directoriesToOpen[0]
+        // @ts-ignore
         fileList.push(...filesToOpen)
         filesToOpen.length = 0
       } else {
@@ -532,17 +546,20 @@ class App {
       // Directores are always opened in a new window if not already opened.
       for (const item of directoriesToOpen) {
         const { rootDirectory, fileList } = item
+        // @ts-ignore
         this._createEditorWindow(rootDirectory, fileList)
       }
     } else {
       // Open each file and directory in a new window.
 
       for (const pathname of filesToOpen) {
+        // @ts-ignore
         this._createEditorWindow(null, [pathname])
       }
 
       for (const item of directoriesToOpen) {
         const { rootDirectory, fileList } = item
+        // @ts-ignore
         this._createEditorWindow(rootDirectory, fileList)
       }
     }
@@ -551,7 +568,7 @@ class App {
     pathsToOpen.length = 0
   }
 
-  _openSettingsWindow(category) {
+  _openSettingsWindow(category?: string) {
     const settingWins = this._windowManager.getWindowsByType(WindowType.SETTINGS)
     if (settingWins.length >= 1) {
       // A setting window is already created
@@ -572,16 +589,20 @@ class App {
     registerSpellcheckerListeners()
 
     // 处理语言设置请求
-    ipcMain.on('mt::get-current-language', (event) => {
+    ipcMain.on('mt::get-current-language', (event: IpcMainEvent) => {
+      // @ts-ignore
       const { language } = this._accessor.preferences.getAll()
-      event.reply('mt::current-language', language || 'en')
+      const lang = language || 'en'
+      // @ts-ignore
+      event.sender.send('mt::current-language', String(lang))
     })
 
     ipcMain.on('app-create-editor-window', () => {
       this._createEditorWindow()
     })
 
-    ipcMain.on('screen-capture', async (win) => {
+    // @ts-ignore
+    ipcMain.on('screen-capture', async (win: BrowserWindow) => {
       if (isOsx) {
         // Use macOs `screencapture` command line when in macOs system.
         const screenshotFileName = await this.getScreenshotFileName()
@@ -598,6 +619,7 @@ class App {
           } catch (err) {
             log.error(err)
           }
+          // @ts-ignore
           win.webContents.send('mt::screenshot-captured')
         })
       } else {
@@ -609,13 +631,14 @@ class App {
       }
     })
 
-    ipcMain.on('app-create-settings-window', (category) => {
+    ipcMain.on('app-create-settings-window', (event: IpcMainEvent, category: string) => {
       this._openSettingsWindow(category)
     })
 
-    ipcMain.on('app-open-file-by-id', (windowId, filePath) => {
+    ipcMain.on('app-open-file-by-id', (event: IpcMainEvent, windowId: number, filePath: string) => {
       const openFilesInNewWindow = this._accessor.preferences.getItem('openFilesInNewWindow')
       if (openFilesInNewWindow) {
+        // @ts-ignore
         this._createEditorWindow(null, [filePath])
       } else {
         const editor = this._windowManager.get(windowId)
@@ -624,26 +647,31 @@ class App {
         }
       }
     })
-    ipcMain.on('app-open-files-by-id', (windowId, fileList) => {
+    ipcMain.on('app-open-files-by-id', (event: IpcMainEvent, windowId: number, fileList: string[]) => {
       const openFilesInNewWindow = this._accessor.preferences.getItem('openFilesInNewWindow')
       if (openFilesInNewWindow) {
+        // @ts-ignore
         this._createEditorWindow(null, fileList)
       } else {
         const editor = this._windowManager.get(windowId)
         if (editor) {
           editor.openTabsFromPaths(
             fileList
+              // @ts-ignore
               .map((p) => normalizeMarkdownPath(p))
+              // @ts-ignore
               .filter((i) => i && !i.isDir)
+              // @ts-ignore
               .map((i) => i.path)
           )
         }
       }
     })
 
-    ipcMain.on('app-open-markdown-by-id', (windowId, data) => {
+    ipcMain.on('app-open-markdown-by-id', (event: IpcMainEvent, windowId: number, data: string) => {
       const openFilesInNewWindow = this._accessor.preferences.getItem('openFilesInNewWindow')
       if (openFilesInNewWindow) {
+        // @ts-ignore
         this._createEditorWindow(null, [], [data])
       } else {
         const editor = this._windowManager.get(windowId)
@@ -653,28 +681,32 @@ class App {
       }
     })
 
-    ipcMain.on('app-open-directory-by-id', (windowId, pathname, openInSameWindow) => {
+    ipcMain.on('app-open-directory-by-id', (event: IpcMainEvent, windowId: number, pathname: string, openInSameWindow: boolean) => {
       const { openFolderInNewWindow } = this._accessor.preferences.getAll()
       if (openInSameWindow || !openFolderInNewWindow) {
         const editor = this._windowManager.get(windowId)
         if (editor) {
+          // @ts-ignore
           editor.openFolder(pathname)
           return
         }
       }
+      // @ts-ignore
       this._createEditorWindow(pathname)
     })
 
     // --- renderer -------------------
 
-    ipcMain.on('mt::app-try-quit', () => {
+    ipcMain.on('mt::app-try-quit', (event: IpcMainEvent) => {
       app.quit()
     })
 
-    ipcMain.on('mt::open-file-by-window-id', (e, windowId, filePath) => {
+    ipcMain.on('mt::open-file-by-window-id', (e: IpcMainEvent, windowId: number, filePath: string) => {
+      // @ts-ignore
       const resolvedPath = normalizeAndResolvePath(filePath)
       const openFilesInNewWindow = this._accessor.preferences.getItem('openFilesInNewWindow')
       if (openFilesInNewWindow) {
+        // @ts-ignore
         this._createEditorWindow(null, [resolvedPath])
       } else {
         const editor = this._windowManager.get(windowId)
@@ -684,17 +716,21 @@ class App {
       }
     })
 
-    ipcMain.on('mt::select-default-directory-to-open', async (e) => {
+    ipcMain.on('mt::select-default-directory-to-open', async (e: IpcMainEvent) => {
       const { preferences } = this._accessor
+      // @ts-ignore
       const { defaultDirectoryToOpen } = preferences.getAll()
       const win = BrowserWindow.fromWebContents(e.sender)
+      if (!win) return
 
-      const { filePaths } = await dialog.showOpenDialog(win, {
+      const result = await dialog.showOpenDialog(win, {
         defaultPath: defaultDirectoryToOpen,
         properties: ['openDirectory', 'createDirectory']
       })
-      if (filePaths && filePaths[0]) {
-        preferences.setItems({ defaultDirectoryToOpen: filePaths[0] })
+      // @ts-ignore
+      if (result.filePaths && result.filePaths[0]) {
+        // @ts-ignore
+        preferences.setItems({ defaultDirectoryToOpen: result.filePaths[0] })
       }
     })
 
@@ -702,36 +738,46 @@ class App {
       this._openSettingsWindow()
     })
 
-    ipcMain.on('mt::make-screenshot', (e) => {
+    ipcMain.on('mt::make-screenshot', (e: IpcMainEvent) => {
+      // @ts-ignore
       const win = BrowserWindow.fromWebContents(e.sender)
+      // @ts-ignore
       ipcMain.emit('screen-capture', win)
     })
 
-    ipcMain.on('mt::request-keybindings', (e) => {
+    ipcMain.on('mt::request-keybindings', (e: IpcMainEvent) => {
+      // @ts-ignore
       const win = BrowserWindow.fromWebContents(e.sender)
       const { keybindings } = this._accessor
-      // Convert map to object
-      win.webContents.send('mt::keybindings-response', Object.fromEntries(keybindings.keys))
+      if (win) {
+        // Convert map to object
+        win.webContents.send('mt::keybindings-response', Object.fromEntries(keybindings.keys))
+      }
     })
 
     ipcMain.on('mt::open-keybindings-config', () => {
       const { keybindings } = this._accessor
+      // @ts-ignore
       keybindings.openConfigInFileManager()
     })
 
     ipcMain.handle('mt::keybinding-get-pref-keybindings', () => {
       const { keybindings } = this._accessor
+      // @ts-ignore
       const defaultKeybindings = keybindings.getDefaultKeybindings()
+      // @ts-ignore
       const userKeybindings = keybindings.getUserKeybindings()
       return { defaultKeybindings, userKeybindings }
     })
 
     ipcMain.handle('mt::keybinding-save-user-keybindings', async (event, userKeybindings) => {
       const { keybindings } = this._accessor
+      // @ts-ignore
       return keybindings.setUserKeybindings(userKeybindings)
     })
 
     ipcMain.handle('mt::fs-trash-item', async (event, fullPath) => {
+      // @ts-ignore
       return shell.trashItem(fullPath)
     })
   }

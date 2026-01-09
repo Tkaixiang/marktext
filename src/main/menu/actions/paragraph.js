@@ -188,7 +188,7 @@ const setCheckedMenuItem = (applicationMenu, { affiliation, isTable, isLooseList
 /**
  * Update paragraph menu entires from given state.
  *
- * @param {Electron.MenuItem} applicationMenu The application menu instance.
+ * @param {Electron.Menu} applicationMenu The application menu instance.
  * @param {*} state The selection information.
  */
 export const updateSelectionMenus = (applicationMenu, state) => {
