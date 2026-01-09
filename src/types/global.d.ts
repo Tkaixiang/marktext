@@ -61,4 +61,8 @@ declare global {
   }
 }
 
+declare module 'ced' {
+  export default function ced(buffer: Buffer): string
+}
+
 export {}

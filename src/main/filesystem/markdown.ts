@@ -3,12 +3,31 @@ import path from 'path'
 import log from 'electron-log'
 import iconv from 'iconv-lite'
 import { LINE_ENDING_REG, LF_LINE_ENDING_REG, CRLF_LINE_ENDING_REG } from '../config'
+// @ts-ignore
 import { isDirectory2 } from 'common/filesystem'
+// @ts-ignore
 import { isMarkdownFile } from 'common/filesystem/paths'
 import { normalizeAndResolvePath, writeFile } from '../filesystem'
 import { guessEncoding } from './encoding'
 
-const getLineEnding = (lineEnding) => {
+export interface IMarkdownDocumentOptions {
+  encoding: {
+    encoding: string
+    isBom: boolean
+  }
+  lineEnding: string
+  adjustLineEndingOnSave: boolean
+  trimTrailingNewline: number
+}
+
+export interface IMarkdownDocumentRaw extends IMarkdownDocumentOptions {
+  markdown: string
+  filename: string
+  pathname: string
+  isMixedLineEndings: boolean
+}
+
+const getLineEnding = (lineEnding: string): string => {
   if (lineEnding === 'lf') {
     return '\n'
   } else if (lineEnding === 'crlf') {
@@ -20,7 +39,7 @@ const getLineEnding = (lineEnding) => {
   return '\n'
 }
 
-const convertLineEndings = (text, lineEnding) => {
+const convertLineEndings = (text: string, lineEnding: string): string => {
   return text.replace(LINE_ENDING_REG, getLineEnding(lineEnding))
 }
 
@@ -31,7 +50,7 @@ const convertLineEndings = (text, lineEnding) => {
  * @returns {{isDir: boolean, path: string}?} Returns the normalize path and a
  * directory hint or null if it's not a directory or markdown file.
  */
-export const normalizeMarkdownPath = (pathname) => {
+export const normalizeMarkdownPath = (pathname: string): { isDir: boolean; path: string } | null => {
   const isDir = isDirectory2(pathname)
   if (isDir || isMarkdownFile(pathname)) {
     // Normalize and resolve the path or link target.
@@ -52,7 +71,11 @@ export const normalizeMarkdownPath = (pathname) => {
  * @param {string} content The buffer to save.
  * @param {IMarkdownDocumentOptions} options The markdown document options
  */
-export const writeMarkdownFile = (pathname, content, options) => {
+export const writeMarkdownFile = (
+  pathname: string,
+  content: string,
+  options: IMarkdownDocumentOptions
+): Promise<void> => {
   const { adjustLineEndingOnSave, lineEnding } = options
   const { encoding, isBom } = options.encoding
   const extension = path.extname(pathname) || '.md'
@@ -77,11 +100,11 @@ export const writeMarkdownFile = (pathname, content, options) => {
  * @returns {IMarkdownDocumentRaw} Returns a raw markdown document.
  */
 export const loadMarkdownFile = async (
-  pathname,
-  preferredEol,
+  pathname: string,
+  preferredEol: string,
   autoGuessEncoding = true,
   trimTrailingNewline = 2
-) => {
+): Promise<IMarkdownDocumentRaw> => {
   // TODO: Use streams to not buffer the file multiple times and only guess
   //       encoding on the first 256/512 bytes.
 

@@ -2,7 +2,10 @@ import path from 'path'
 import fsPromises from 'fs/promises'
 import log from 'electron-log'
 import chokidar from 'chokidar'
+import { BrowserWindow } from 'electron'
+// @ts-ignore
 import { exists } from 'common/filesystem'
+// @ts-ignore
 import { hasMarkdownExtension, checkPathExcludePattern } from 'common/filesystem/paths'
 import { getUniqueId } from '../utils'
 import { loadMarkdownFile } from '../filesystem/markdown'
@@ -18,11 +21,20 @@ const EVENT_NAME = {
   file: 'mt::update-file'
 }
 
-const add = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTrailingNewline) => {
+type WatcherType = 'dir' | 'file'
+
+const add = async (
+  win: BrowserWindow,
+  pathname: string,
+  type: WatcherType,
+  endOfLine: string,
+  autoGuessEncoding: boolean,
+  trimTrailingNewline: number
+) => {
   const stats = await fsPromises.stat(pathname)
   const birthTime = stats.birthtime
   const isMarkdown = hasMarkdownExtension(pathname)
-  const file = {
+  const file: any = {
     pathname,
     name: path.basename(pathname),
     isFile: true,
@@ -40,7 +52,7 @@ const add = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTraili
         trimTrailingNewline
       )
       file.data = data
-    } catch (err) {
+    } catch (err: any) {
       // Only notify user about opened files.
       if (type === 'file') {
         win.webContents.send('mt::show-notification', {
@@ -58,7 +70,7 @@ const add = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTraili
   }
 }
 
-const unlink = (win, pathname, type) => {
+const unlink = (win: BrowserWindow, pathname: string, type: WatcherType) => {
   const file = { pathname }
   win.webContents.send(EVENT_NAME[type], {
     type: 'unlink',
@@ -66,7 +78,14 @@ const unlink = (win, pathname, type) => {
   })
 }
 
-const change = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTrailingNewline) => {
+const change = async (
+  win: BrowserWindow,
+  pathname: string,
+  type: WatcherType,
+  endOfLine: string,
+  autoGuessEncoding: boolean,
+  trimTrailingNewline: number
+) => {
   // No need to update the tree view if the file content has changed.
   if (type === 'dir') return
 
@@ -89,7 +108,7 @@ const change = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTra
         type: 'change',
         change: file
       })
-    } catch (err) {
+    } catch (err: any) {
       // Only notify user about opened files.
       if (type === 'file') {
         win.webContents.send('mt::show-notification', {
@@ -102,7 +121,7 @@ const change = async (win, pathname, type, endOfLine, autoGuessEncoding, trimTra
   }
 }
 
-const addDir = (win, pathname, type) => {
+const addDir = (win: BrowserWindow, pathname: string, type: WatcherType) => {
   if (type === 'file') return
 
   const directory = {
@@ -122,7 +141,7 @@ const addDir = (win, pathname, type) => {
   })
 }
 
-const unlinkDir = (win, pathname, type) => {
+const unlinkDir = (win: BrowserWindow, pathname: string, type: WatcherType) => {
   if (type === 'file') return
 
   const directory = { pathname }
@@ -132,18 +151,39 @@ const unlinkDir = (win, pathname, type) => {
   })
 }
 
+import { FSWatcher } from 'chokidar'
+
+interface WatcherEntry {
+  win: BrowserWindow
+  watcher: FSWatcher
+  pathname: string
+  type: WatcherType
+  close: () => void
+}
+
+interface IgnoreEvent {
+  windowId: number
+  pathname: string
+  duration: number
+  start: Date
+}
+
 class Watcher {
+  private _preferences: any
+  private _ignoreChangeEvents: IgnoreEvent[]
+  public watchers: Record<string, WatcherEntry>
+
   /**
    * @param {Preference} preferences The preference instance.
    */
-  constructor (preferences) {
+  constructor(preferences: any) {
     this._preferences = preferences
     this._ignoreChangeEvents = []
     this.watchers = {}
   }
 
   // Watch a file or directory and return a unwatch function.
-  watch (win, watchPath, type = 'dir'/* file or dir */) {
+  watch(win: BrowserWindow, watchPath: string, type: WatcherType = 'dir' /* file or dir */) {
     // TODO: Is it needed to set `watcherUsePolling` ? because macOS need to set to true.
     const usePolling = isOsx ? true : this._preferences.getItem('watcherUsePolling')
 
@@ -160,7 +200,12 @@ class Watcher {
           return true
         }
 
-        if (checkPathExcludePattern(pathname, this._preferences.getItem('treePathExcludePatterns'))) {
+        if (
+          checkPathExcludePattern(
+            pathname,
+            this._preferences.getItem('treePathExcludePatterns')
+          )
+        ) {
           return true
         }
         if (fileInfo.isDirectory()) {
@@ -187,29 +232,30 @@ class Watcher {
 
     let disposed = false
     let enospcReached = false
-    let renameTimer = null
+    let renameTimer: NodeJS.Timeout | null = null
 
     watcher
-      .on('add', async pathname => {
-        if (!await this._shouldIgnoreEvent(win.id, pathname, type, usePolling)) {
+      .on('add', async (pathname) => {
+        if (!(await this._shouldIgnoreEvent(win.id, pathname, type, usePolling))) {
           const { _preferences } = this
           const eol = _preferences.getPreferredEol()
           const { autoGuessEncoding, trimTrailingNewline } = _preferences.getAll()
           add(win, pathname, type, eol, autoGuessEncoding, trimTrailingNewline)
         }
       })
-      .on('change', async pathname => {
-        if (!await this._shouldIgnoreEvent(win.id, pathname, type, usePolling)) {
+      .on('change', async (pathname) => {
+        if (!(await this._shouldIgnoreEvent(win.id, pathname, type, usePolling))) {
           const { _preferences } = this
           const eol = _preferences.getPreferredEol()
           const { autoGuessEncoding, trimTrailingNewline } = _preferences.getAll()
           change(win, pathname, type, eol, autoGuessEncoding, trimTrailingNewline)
         }
       })
-      .on('unlink', pathname => unlink(win, pathname, type))
-      .on('addDir', pathname => addDir(win, pathname, type))
-      .on('unlinkDir', pathname => unlinkDir(win, pathname, type))
+      .on('unlink', (pathname) => unlink(win, pathname, type))
+      .on('addDir', (pathname) => addDir(win, pathname, type))
+      .on('unlinkDir', (pathname) => unlinkDir(win, pathname, type))
       .on('raw', (event, subpath, details) => {
+        // @ts-ignore
         if (global.MARKTEXT_DEBUG_VERBOSE >= 3) {
           console.log('watcher: ', event, subpath, details)
         }
@@ -236,7 +282,7 @@ class Watcher {
           }, 150)
         }
       })
-      .on('error', error => {
+      .on('error', (error: any) => {
         // Check if too many file descriptors are opened and notify the user about this issue.
         if (error.code === 'ENOSPC') {
           if (!enospcReached) {
@@ -246,7 +292,8 @@ class Watcher {
             win.webContents.send('mt::show-notification', {
               title: 'inotify limit reached',
               type: 'warning',
-              message: 'Cannot watch all files and file changes because too many file descriptors are opened.'
+              message:
+                'Cannot watch all files and file changes because too many file descriptors are opened.'
             })
           }
         } else {
@@ -280,14 +327,10 @@ class Watcher {
   }
 
   // Remove a single watcher.
-  unwatch (win, watchPath, type = 'dir') {
+  unwatch(win: BrowserWindow, watchPath: string, type: WatcherType = 'dir') {
     for (const id of Object.keys(this.watchers)) {
       const w = this.watchers[id]
-      if (
-        w.win === win &&
-        w.pathname === watchPath &&
-        w.type === type
-      ) {
+      if (w && w.win === win && w.pathname === watchPath && w.type === type) {
         w.watcher.close()
         delete this.watchers[id]
         break
@@ -296,24 +339,28 @@ class Watcher {
   }
 
   // Remove all watchers from the given window id.
-  unwatchByWindowId (windowId) {
-    const watchers = []
-    const watchIds = []
+  unwatchByWindowId(windowId: number) {
+    const watchers: FSWatcher[] = []
+    const watchIds: string[] = []
     for (const id of Object.keys(this.watchers)) {
       const w = this.watchers[id]
-      if (w.win.id === windowId) {
+      if (w && w.win.id === windowId) {
         watchers.push(w.watcher)
         watchIds.push(id)
       }
     }
     if (watchers.length) {
-      watchIds.forEach(id => delete this.watchers[id])
-      watchers.forEach(watcher => watcher.close())
+      watchIds.forEach((id) => delete this.watchers[id])
+      watchers.forEach((watcher) => watcher.close())
     }
   }
 
-  close () {
-    Object.keys(this.watchers).forEach(id => this.watchers[id].close())
+  close() {
+    Object.keys(this.watchers).forEach((id) => {
+      if (this.watchers[id]) {
+        this.watchers[id].close()
+      }
+    })
     this.watchers = {}
     this._ignoreChangeEvents = []
   }
@@ -327,7 +374,11 @@ class Watcher {
    * @param {string} pathname The path to ignore.
    * @param {number} [duration] The duration in ms to ignore the changed event.
    */
-  ignoreChangedEvent (windowId, pathname, duration = WATCHER_STABILITY_THRESHOLD + (WATCHER_STABILITY_POLL_INTERVAL * 2)) {
+  ignoreChangedEvent(
+    windowId: number,
+    pathname: string,
+    duration = WATCHER_STABILITY_THRESHOLD + WATCHER_STABILITY_POLL_INTERVAL * 2
+  ) {
     this._ignoreChangeEvents.push({ windowId, pathname, duration, start: new Date() })
   }
 
@@ -339,17 +390,25 @@ class Watcher {
    * @param {string} type
    * @param {boolean} usePolling
    */
-  async _shouldIgnoreEvent (winId, pathname, type, usePolling) {
+  async _shouldIgnoreEvent(
+    winId: number,
+    pathname: string,
+    type: string,
+    usePolling: boolean
+  ) {
     if (type === 'file') {
       const { _ignoreChangeEvents } = this
       const currentTime = new Date()
       for (let i = 0; i < _ignoreChangeEvents.length; ++i) {
-        const { windowId, pathname: pathToIgnore, start, duration } = _ignoreChangeEvents[i]
+        const event = _ignoreChangeEvents[i]
+        if (!event) continue
+        const { windowId, pathname: pathToIgnore, start, duration } = event
         if (windowId === winId && pathToIgnore === pathname) {
           _ignoreChangeEvents.splice(i, 1)
           --i
 
           // Modification origin is the editor and we should ignore the event.
+          // @ts-ignore
           if (currentTime - start < duration) {
             return true
           }
@@ -358,8 +417,11 @@ class Watcher {
           if (!usePolling) {
             try {
               const fileInfo = await fsPromises.stat(pathname)
+              // @ts-ignore
               if (fileInfo.mtime - start < duration) {
+                // @ts-ignore
                 if (global.MARKTEXT_DEBUG_VERBOSE >= 3) {
+                  // @ts-ignore
                   console.log(`Ignoring file event after "stat": current="${currentTime}", start="${start}", file="${fileInfo.mtime}".`)
                 }
                 return true

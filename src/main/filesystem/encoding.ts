@@ -1,6 +1,7 @@
+// @ts-ignore
 import ced from 'ced'
 
-const CED_ICONV_ENCODINGS = {
+const CED_ICONV_ENCODINGS: Record<string, string> = {
   'BIG5-CP950': 'big5',
   KSC: 'euckr',
   'ISO-2022-KR': 'euckr',
@@ -19,17 +20,22 @@ const CED_ICONV_ENCODINGS = {
 }
 
 // Byte Order Mark's to detect endianness and encoding.
-const BOM_ENCODINGS = {
+const BOM_ENCODINGS: Record<string, number[]> = {
   utf8: [0xef, 0xbb, 0xbf],
   utf16be: [0xfe, 0xff],
   utf16le: [0xff, 0xfe]
 }
 
-const checkSequence = (buffer, sequence) => {
+const checkSequence = (buffer: Buffer, sequence: number[]) => {
   if (buffer.length < sequence.length) {
     return false
   }
   return sequence.every((v, i) => v === buffer[i])
+}
+
+export interface Encoding {
+  encoding: string
+  isBom: boolean
 }
 
 /**
@@ -39,7 +45,7 @@ const checkSequence = (buffer, sequence) => {
  * @param {boolean} autoGuessEncoding
  * @returns {Encoding}
  */
-export const guessEncoding = (buffer, autoGuessEncoding) => {
+export const guessEncoding = (buffer: Buffer, autoGuessEncoding: boolean): Encoding => {
   let isBom = false
   let encoding = 'utf8'
 
@@ -67,7 +73,7 @@ export const guessEncoding = (buffer, autoGuessEncoding) => {
   if (autoGuessEncoding) {
     encoding = ced(buffer)
     if (CED_ICONV_ENCODINGS[encoding]) {
-      encoding = CED_ICONV_ENCODINGS[encoding]
+      encoding = CED_ICONV_ENCODINGS[encoding]!
     } else {
       encoding = encoding.toLowerCase().replace(/-_/g, '')
     }

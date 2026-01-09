@@ -10,7 +10,8 @@
   },
   "include": [
     "src/main/**/*",
-    "src/common/**/*"
+    "src/common/**/*",
+    "src/types/**/*"
   ],
   "exclude": [
     "src/muya/**/*",

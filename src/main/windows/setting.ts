@@ -1,5 +1,5 @@
 import path from 'path'
-import { BrowserWindow, ipcMain } from 'electron'
+import { BrowserWindow, ipcMain, BrowserWindowConstructorOptions } from 'electron'
 import { enable as remoteEnable } from '@electron/remote/main'
 import { electronLocalshortcut } from '@hfelix/electron-localshortcut'
 import BaseWindow, { WindowLifecycle, WindowType } from './base'
@@ -11,7 +11,7 @@ class SettingWindow extends BaseWindow {
   /**
    * @param {Accessor} accessor The application accessor for application instances.
    */
-  constructor(accessor) {
+  constructor(accessor: any) {
     super(accessor)
     this.type = WindowType.SETTINGS
   }
@@ -21,11 +21,12 @@ class SettingWindow extends BaseWindow {
    *
    * @param {*} [category] The settings category tab name.
    */
-  createWindow(category = null) {
+  createWindow(category: string | null = null) {
     const { menu: appMenu, env, keybindings, preferences } = this._accessor
-    const winOptions = Object.assign({}, preferencesWinOptions)
+    const winOptions: BrowserWindowConstructorOptions = Object.assign({}, preferencesWinOptions)
     centerWindowOptions(winOptions)
     if (isLinux) {
+      // @ts-ignore
       winOptions.icon = path.join(global.__static, 'logo-96px.png')
     }
 
@@ -43,7 +44,7 @@ class SettingWindow extends BaseWindow {
     }
 
     winOptions.backgroundColor = this._getPreferredBackgroundColor(theme)
-    let win = (this.browserWindow = new BrowserWindow(winOptions))
+    let win: BrowserWindow | null = (this.browserWindow = new BrowserWindow(winOptions))
 
     win.webContents.on('did-fail-load', (event, code, desc, url) => {
       log.error(`did-fail-load ${code} ${desc} @ ${url}`)
@@ -65,20 +66,26 @@ class SettingWindow extends BaseWindow {
 
     win.on('focus', () => {
       this.emit('window-focus')
-      win.webContents.send('mt::window-active-status', { status: true })
+      if (win) {
+        win.webContents.send('mt::window-active-status', { status: true })
+      }
     })
 
     // Lost focus
     win.on('blur', () => {
       this.emit('window-blur')
-      win.webContents.send('mt::window-active-status', { status: false })
+      if (win) {
+        win.webContents.send('mt::window-active-status', { status: false })
+      }
     })
 
+    // @ts-ignore
     win.on('close', (event) => {
       this.emit('window-close')
 
       event.preventDefault()
-      ipcMain.emit('window-close-by-id', win.id)
+      // @ts-ignore
+      if (win) ipcMain.emit('window-close-by-id', win.id)
     })
 
     // The window is now destroyed.
@@ -90,19 +97,23 @@ class SettingWindow extends BaseWindow {
     })
 
     this.lifecycle = WindowLifecycle.LOADING
+    // @ts-ignore
     win.loadURL(this._buildUrlString(this.id, env, preferences, category))
+    // @ts-ignore
     win.setSheetOffset(TITLE_BAR_HEIGHT)
 
     const devToolsAccelerator = keybindings.getAccelerator('view.toggle-dev-tools')
-    if (env.debug && devToolsAccelerator) {
+    if (env.debug && devToolsAccelerator && win) {
+      // @ts-ignore
       electronLocalshortcut.register(win, devToolsAccelerator, () => {
-        win.webContents.toggleDevTools()
+        // @ts-ignore
+        if (win) win.webContents.toggleDevTools()
       })
     }
     return win
   }
 
-  _buildUrlString(windowId, env, userPreference, category) {
+  _buildUrlString(windowId: number, env: any, userPreference: any, category: string | null = null) {
     const url = this._buildUrlWithSettings(windowId, env, userPreference)
     if (category) {
       // Overwrite type to add category name
