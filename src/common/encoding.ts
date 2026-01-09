@@ -35,16 +35,21 @@ export const ENCODING_NAME_MAP = Object.freeze({
   eucjp: 'Japanese (EUC-JP)',
   euckr: 'Korean (EUC-KR)',
   latin6: 'Nordic (ISO 8859-10)'
-})
+} as const)
+
+export interface Encoding {
+  encoding: string
+  isBom?: boolean
+}
 
 /**
  * Try to translate the encoding.
  *
  * @param {Encoding} enc The encoding object.
  */
-export const getEncodingName = enc => {
+export const getEncodingName = (enc: Encoding): string => {
   const { encoding, isBom } = enc
-  let str = ENCODING_NAME_MAP[encoding] || encoding
+  let str: string = ENCODING_NAME_MAP[encoding as keyof typeof ENCODING_NAME_MAP] || encoding
   if (isBom) {
     str += ' with BOM'
   }

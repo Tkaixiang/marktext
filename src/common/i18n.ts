@@ -2,17 +2,17 @@ import fs from 'fs'
 import path from 'path'
 
 // 支持的语言列表
-const SUPPORTED_LANGUAGES = ['en', 'zh-CN', 'zh-TW', 'es', 'fr', 'de', 'ja', 'ko', 'pt']
+const SUPPORTED_LANGUAGES: string[] = ['en', 'zh-CN', 'zh-TW', 'es', 'fr', 'de', 'ja', 'ko', 'pt']
 
 // 翻译数据缓存
-let translationsCache = {}
+let translationsCache: Record<string, any> = {}
 
 /**
  * 加载指定语言的翻译文件
  * @param {string} language - 语言代码
  * @returns {object} 翻译数据
  */
-function loadTranslations(language) {
+function loadTranslations(language: string): any {
   if (translationsCache[language]) {
     return translationsCache[language]
   }
@@ -53,17 +53,17 @@ function loadTranslations(language) {
  * @param {object} params - 参数替换对象
  * @returns {string} 翻译后的文本
  */
-function getTranslation(key, language = 'en', params = {}) {
+function getTranslation(key: string, language: string = 'en', params: Record<string, string> = {}): string {
   const translations = loadTranslations(language)
 
   // 支持点分隔的嵌套键
   const keys = key.split('.')
   let probe = translations
 
-  for (key of keys) {
+  for (const k of keys) {
     // Navigate through nested objects until the string
-    if (key in probe) {
-      probe = probe[key]
+    if (probe && typeof probe === 'object' && k in probe) {
+      probe = probe[k]
     } else {
       return key // Unable to find key, return the key itself
     }
@@ -85,7 +85,7 @@ function getTranslation(key, language = 'en', params = {}) {
  * 获取支持的语言列表
  * @returns {string[]} 支持的语言代码数组
  */
-function getSupportedLanguages() {
+function getSupportedLanguages(): string[] {
   return [...SUPPORTED_LANGUAGES]
 }
 
@@ -94,14 +94,14 @@ function getSupportedLanguages() {
  * @param {string} language - 语言代码
  * @returns {boolean} 是否支持
  */
-function isLanguageSupported(language) {
+function isLanguageSupported(language: string): boolean {
   return SUPPORTED_LANGUAGES.includes(language)
 }
 
 /**
  * 清除翻译缓存
  */
-function clearCache() {
+function clearCache(): void {
   translationsCache = {}
 }
 
@@ -110,7 +110,7 @@ function clearCache() {
  * @param {string} language - 语言代码
  * @returns {object} 完整的翻译数据对象
  */
-function getAllTranslations(language) {
+function getAllTranslations(language: string): any {
   return loadTranslations(language)
 }
 

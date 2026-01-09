@@ -18,6 +18,7 @@
       "main_renderer/*": ["src/main/*"]
     },
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "verbatimModuleSyntax": false
   }
 }
