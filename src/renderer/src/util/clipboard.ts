@@ -2,18 +2,18 @@ import { isLinux, isOsx, isWindows } from './index'
 import plist from 'plist'
 import { clipboard as remoteClipboard } from '@electron/remote'
 
-const hasClipboardFiles = () => {
+const hasClipboardFiles = (): boolean => {
   return remoteClipboard.has('NSFilenamesPboardType')
 }
 
-const getClipboardFiles = () => {
+const getClipboardFiles = (): string[] => {
   if (!hasClipboardFiles()) {
     return []
   }
   return plist.parse(remoteClipboard.read('NSFilenamesPboardType'))
 }
 
-export const guessClipboardFilePath = () => {
+export const guessClipboardFilePath = (): string => {
   if (isLinux) return ''
   if (isOsx) {
     const result = getClipboardFiles()
