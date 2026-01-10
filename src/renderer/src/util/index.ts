@@ -1,20 +1,31 @@
-export const delay = (time) => {
-  let timerId
-  let rejectFn
-  const p = new Promise((resolve, reject) => {
+export interface CancellablePromise<T> extends Promise<T> {
+  cancel: () => void
+}
+
+export const delay = (time: number): CancellablePromise<void> => {
+  let timerId: ReturnType<typeof setTimeout> | null
+  let rejectFn: ((reason?: any) => void) | null
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const p = new Promise<void>((resolve, reject) => {
     rejectFn = reject
     timerId = setTimeout(() => {
+      // @ts-ignore
       p.cancel = () => {}
       rejectFn = null
       resolve()
     }, time)
-  })
+  }) as CancellablePromise<void>
 
   p.cancel = () => {
-    clearTimeout(timerId)
-    timerId = null
-    rejectFn()
-    rejectFn = null
+    if (timerId) {
+      clearTimeout(timerId)
+      timerId = null
+    }
+    if (rejectFn) {
+      rejectFn()
+      rejectFn = null
+    }
   }
   return p
 }
@@ -22,17 +33,17 @@ export const delay = (time) => {
 const ID_PREFEX = 'mt-'
 let id = 0
 
-export const serialize = function (params) {
+export const serialize = function (params: Record<string, any>): string {
   return Object.keys(params)
     .map((key) => `${key}=${encodeURI(params[key])}`)
     .join('&')
 }
 
-export const merge = function (...args) {
+export const merge = function (...args: any[]): any {
   return Object.assign({}, ...args)
 }
 
-export const dataURItoBlob = function (dataURI) {
+export const dataURItoBlob = function (dataURI: string): Blob {
   const data = dataURI.split(';base64,')
   const byte = window.atob(data[1])
   const mime = data[0].split(':')[1]
@@ -46,7 +57,17 @@ export const dataURItoBlob = function (dataURI) {
   return new window.Blob([ab], { type: mime })
 }
 
-export const adjustCursor = (cursor, preline, line, nextline) => {
+interface SimpleCursor {
+  line: number
+  ch: number
+}
+
+export const adjustCursor = (
+  cursor: SimpleCursor,
+  preline: string,
+  line: string,
+  nextline: string
+): SimpleCursor | null => {
   let newCursor = Object.assign({}, { line: cursor.line, ch: cursor.ch })
   // It's need to adjust the cursor when cursor is at begin or end in table row.
   if (/\|[^|]+\|.+\|\s*$/.test(line)) {
@@ -81,12 +102,17 @@ export const adjustCursor = (cursor, preline, line, nextline) => {
   // set the newCursor to null, the new cursor will at the last line of document.
 
   if (!/\S/.test(line)) {
-    newCursor = null
+    return null
   }
   return newCursor
 }
 
-export const animatedScrollTo = function (element, to, duration, callback) {
+export const animatedScrollTo = function (
+  element: HTMLElement,
+  to: number,
+  duration: number,
+  callback?: () => void
+): void {
   const start = element.scrollTop
   const change = to - start
   const animationStart = +new Date()
@@ -97,14 +123,14 @@ export const animatedScrollTo = function (element, to, duration, callback) {
     return
   }
 
-  const easeInOutQuad = function (t, b, c, d) {
+  const easeInOutQuad = function (t: number, b: number, c: number, d: number): number {
     t /= d / 2
     if (t < 1) return (c / 2) * t * t + b
     t--
     return (-c / 2) * (t * (t - 2) - 1) + b
   }
 
-  const animateScroll = function () {
+  const animateScroll = function (): void {
     const now = +new Date()
     const val = Math.floor(easeInOutQuad(now - animationStart, start, change, duration))
 
@@ -123,11 +149,11 @@ export const animatedScrollTo = function (element, to, duration, callback) {
   requestAnimationFrame(animateScroll)
 }
 
-export const getUniqueId = () => {
+export const getUniqueId = (): string => {
   return `${ID_PREFEX}${id++}`
 }
 
-export const hasKeys = (obj) => Object.keys(obj).length > 0
+export const hasKeys = (obj: any): boolean => Object.keys(obj).length > 0
 
 /**
  * Clone an object as a shallow or deep copy.
@@ -136,7 +162,7 @@ export const hasKeys = (obj) => Object.keys(obj).length > 0
  * @param {Boolean} deepCopy Create a shallow (false) or deep copy (true)
  * @deprecated Use `cloneObject` (shallow copy) or `deepClone` (deep copy).
  */
-export const cloneObj = (obj, deepCopy = true) => {
+export const cloneObj = <T>(obj: T, deepCopy = true): T => {
   return deepCopy ? JSON.parse(JSON.stringify(obj)) : Object.assign({}, obj)
 }
 
@@ -146,7 +172,7 @@ export const cloneObj = (obj, deepCopy = true) => {
  * @param {*} obj Object to clone
  * @param {boolean} inheritFromObject Whether the clone should inherit from `Object`
  */
-export const cloneObject = (obj, inheritFromObject = true) => {
+export const cloneObject = <T extends object>(obj: T, inheritFromObject = true): T => {
   return Object.assign(inheritFromObject ? {} : Object.create(null), obj)
 }
 
@@ -155,7 +181,7 @@ export const cloneObject = (obj, inheritFromObject = true) => {
  *
  * @param {*} obj Object to clone
  */
-export const deepClone = (obj) => {
+export const deepClone = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj))
 }
 

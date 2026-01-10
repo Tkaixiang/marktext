@@ -1138,10 +1138,14 @@ The migration is complete when:
 - [x] keybinding/*.ts
 - [x] commands/*.ts
 
-#### 3.2 Preload Script Migration
+#### 3.2 Renderer Utils Migration
+- [x] src/renderer/src/util/index.ts
+- [x] src/renderer/src/util/clipboard.ts
+
+#### 3.3 Preload Script Migration
 - [x] src/preload/index.ts
 
-#### 3.3 Main Process Migration
+#### 3.4 Main Process Migration
 - [x] utils/*.ts
 - [x] dataCenter/*.ts
 - [x] filesystem/*.ts
