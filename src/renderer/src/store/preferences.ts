@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
 import bus from '../bus'
 import { setLanguage } from '../i18n'
+import type { PreferenceState } from '@/types/preferences'
 
 export const usePreferencesStore = defineStore('preferences', {
-  state: () => ({
+  state: (): PreferenceState => ({
     autoSave: false,
     autoSaveDelay: 5000,
     titleBarStyle: 'custom',
@@ -107,53 +108,57 @@ export const usePreferencesStore = defineStore('preferences', {
   },
 
   actions: {
-    SET_USER_PREFERENCE(preference) {
+    SET_USER_PREFERENCE(preference: Partial<PreferenceState>) {
       const oldLanguage = this.language
-      
+
       Object.keys(preference).forEach((key) => {
         if (typeof preference[key] !== 'undefined' && typeof this[key] !== 'undefined') {
+          // @ts-ignore
           this[key] = preference[key]
         }
       })
-      
+
       // Update i18n language if language preference changed
       if (preference.language && preference.language !== oldLanguage) {
         setLanguage(preference.language)
       }
     },
-    SET_MODE({ type, checked }) {
+    SET_MODE({ type, checked }: { type: keyof PreferenceState; checked: boolean }) {
+      // @ts-ignore
       this[type] = checked
     },
-    TOGGLE_VIEW_MODE(entryName) {
+    TOGGLE_VIEW_MODE(entryName: string) {
+      // @ts-ignore
       this[entryName] = !this[entryName]
     },
     ASK_FOR_USER_PREFERENCE() {
       window.electron.ipcRenderer.send('mt::ask-for-user-preference')
       window.electron.ipcRenderer.send('mt::ask-for-user-data')
 
-      window.electron.ipcRenderer.on('mt::user-preference', (e, preferences) => {
+      window.electron.ipcRenderer.on('mt::user-preference', (_, preferences) => {
         this.SET_USER_PREFERENCE(preferences)
       })
     },
 
-    SET_SINGLE_PREFERENCE({ type, value }) {
+    SET_SINGLE_PREFERENCE({ type, value }: { type: keyof PreferenceState; value: any }) {
       // Update local state
+      // @ts-ignore
       this[type] = value
-      
+
       // Update i18n language if language preference changed
       if (type === 'language') {
         setLanguage(value)
       }
-      
+
       // save to electron-store
       window.electron.ipcRenderer.send('mt::set-user-preference', { [type]: value })
     },
 
-    SET_USER_DATA({ type, value }) {
+    SET_USER_DATA({ type, value }: { type: string; value: any }) {
       window.electron.ipcRenderer.send('mt::set-user-data', { [type]: value })
     },
 
-    SET_IMAGE_FOLDER_PATH(value) {
+    SET_IMAGE_FOLDER_PATH(value: string) {
       window.electron.ipcRenderer.send('mt::ask-for-modify-image-folder-path', value)
     },
 
@@ -165,21 +170,23 @@ export const usePreferencesStore = defineStore('preferences', {
       window.electron.ipcRenderer.on('mt::show-command-palette', () => {
         bus.emit('show-command-palette')
       })
-      window.electron.ipcRenderer.on('mt::toggle-view-mode-entry', (event, entryName) => {
+      window.electron.ipcRenderer.on('mt::toggle-view-mode-entry', (_, entryName) => {
         this.TOGGLE_VIEW_MODE(entryName)
+        // @ts-ignore
         this.DISPATCH_EDITOR_VIEW_STATE({ [entryName]: this[entryName] })
       })
     },
 
     // Toggle a view option and notify main process to toggle menu item.
     LISTEN_TOGGLE_VIEW() {
-      bus.on('view:toggle-view-entry', (entryName) => {
+      bus.on('view:toggle-view-entry', (entryName: any) => {
         this.TOGGLE_VIEW_MODE(entryName)
+        // @ts-ignore
         this.DISPATCH_EDITOR_VIEW_STATE({ [entryName]: this[entryName] })
       })
     },
 
-    DISPATCH_EDITOR_VIEW_STATE(viewState) {
+    DISPATCH_EDITOR_VIEW_STATE(viewState: any) {
       const { windowId } = global.marktext.env
       window.electron.ipcRenderer.send('mt::view-layout-changed', windowId, viewState)
     }

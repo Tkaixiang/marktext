@@ -1,12 +1,26 @@
 import { getUniqueId, deepClone } from '../util'
 import { i18n } from '../i18n'
+import type { MarkdownDocument } from '@/types/editor'
 
-/**
- * Default internel markdown document with editor options.
- *
- * @type {IDocumentState} Internel markdown document
- */
-export const defaultFileState = {
+interface DocumentOptions {
+  encoding: { encoding: string; isBom: boolean }
+  lineEnding: string
+  adjustLineEndingOnSave: boolean
+  trimTrailingNewline: number
+}
+
+interface DocumentData {
+  markdown: string
+  filename: string
+  pathname: string
+  encoding: { encoding: string; isBom: boolean }
+  lineEnding: string
+  adjustLineEndingOnSave: boolean
+  trimTrailingNewline: number
+}
+
+// TODO: Refactor this to use shared types
+export const defaultFileState: any = {
   // Indicates whether there are unsaved changes.
   isSaved: true,
   // Full path to the file or empty. If the value is empty the file doesn't exist on disk.
@@ -40,12 +54,12 @@ export const defaultFileState = {
   notifications: []
 }
 
-export const getOptionsFromState = (file) => {
+export const getOptionsFromState = (file: any): DocumentOptions => {
   const { encoding, lineEnding, adjustLineEndingOnSave, trimTrailingNewline } = file
   return { encoding, lineEnding, adjustLineEndingOnSave, trimTrailingNewline }
 }
 
-export const getFileStateFromData = (data) => {
+export const getFileStateFromData = (data: DocumentData) => {
   const fileState = JSON.parse(JSON.stringify(defaultFileState))
   const {
     markdown,
@@ -73,7 +87,7 @@ export const getFileStateFromData = (data) => {
 }
 
 export const getBlankFileState = (
-  tabs,
+  tabs: any[],
   defaultEncoding = 'utf8',
   lineEnding = 'lf',
   markdown = ''
@@ -107,13 +121,21 @@ export const getBlankFileState = (
   })
 }
 
+interface SingleFileStateOptions {
+  id?: string
+  markdown: string
+  filename: string
+  pathname: string
+  options: DocumentOptions
+}
+
 export const getSingleFileState = ({
   id = getUniqueId(),
   markdown,
   filename,
   pathname,
   options
-}) => {
+}: SingleFileStateOptions) => {
   // TODO(refactor:renderer/editor): Replace this function with `createDocumentState`.
 
   const fileState = deepClone(defaultFileState)
@@ -140,7 +162,7 @@ export const getSingleFileState = ({
  * @param {String} [id] Random identifier
  * @returns {IDocumentState} Returns a document state
  */
-export const createDocumentState = (markdownDocument, id = getUniqueId()) => {
+export const createDocumentState = (markdownDocument: MarkdownDocument, id = getUniqueId()) => {
   const docState = deepClone(defaultFileState)
   const {
     markdown,
@@ -151,7 +173,7 @@ export const createDocumentState = (markdownDocument, id = getUniqueId()) => {
     adjustLineEndingOnSave,
     trimTrailingNewline,
     cursor = null
-  } = markdownDocument
+  } = markdownDocument as any
 
   assertLineEnding(adjustLineEndingOnSave, lineEnding)
 
@@ -168,7 +190,7 @@ export const createDocumentState = (markdownDocument, id = getUniqueId()) => {
   })
 }
 
-const assertLineEnding = (adjustLineEndingOnSave, lineEnding) => {
+const assertLineEnding = (adjustLineEndingOnSave: boolean, lineEnding: string) => {
   lineEnding = lineEnding.toLowerCase()
   if (
     (adjustLineEndingOnSave && lineEnding !== 'crlf') ||

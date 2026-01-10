@@ -10,21 +10,21 @@ export const useAutoUpdatesStore = defineStore('autoUpdates', {
           title: 'Update',
           type: 'error',
           time: 10000,
-          message
+          message: message as string
         })
       })
       window.electron.ipcRenderer.on('mt::UPDATE_NOT_AVAILABLE', (_, message) => {
         notice.notify({
           title: 'Update not Available',
           type: 'primary',
-          message
+          message: message as string
         })
       })
       window.electron.ipcRenderer.on('mt::UPDATE_DOWNLOADED', (_, message) => {
         notice.notify({
           title: 'Update Downloaded',
           type: 'info',
-          message
+          message: message as string
         })
       })
       window.electron.ipcRenderer.on('mt::UPDATE_AVAILABLE', (_, message) => {
@@ -32,7 +32,7 @@ export const useAutoUpdatesStore = defineStore('autoUpdates', {
           .notify({
             title: 'Update Available',
             type: 'primary',
-            message,
+            message: message as string,
             showConfirm: true
           })
           .then(() => {

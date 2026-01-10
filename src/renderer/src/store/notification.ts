@@ -6,7 +6,7 @@ export const useNotificationStore = defineStore('notification', {
   state: () => ({}),
   actions: {
     listenForNotification() {
-      const DEFAULT_OPTS = {
+      const DEFAULT_OPTS: any = {
         title: t('notifications.defaultTitle'),
         type: 'primary',
         time: 10000,

@@ -12,6 +12,7 @@
   "include": [
     "src/renderer/**/*",
     "src/muya/**/*",
-    "src/common/**/*"
+    "src/common/**/*",
+    "src/types/**/*"
   ]
 }

@@ -2,9 +2,16 @@ import { createPinia, defineStore } from 'pinia'
 
 const pinia = createPinia()
 
+interface MainState {
+  platform: string
+  appVersion: string
+  windowActive: boolean
+  init: boolean
+}
+
 // Main store for global states
 export const useMainStore = defineStore('main', {
-  state: () => ({
+  state: (): MainState => ({
     platform: window.electron.process.platform, // platform of system `darwin` | `win32` | `linux`
     appVersion: window.electron.process.env.MARKTEXT_VERSION_STRING, // MarkText version string
     windowActive: true, // whether current window is active or focused
@@ -16,7 +23,7 @@ export const useMainStore = defineStore('main', {
   },
 
   actions: {
-    SET_WIN_STATUS(status) {
+    SET_WIN_STATUS(status: boolean) {
       this.windowActive = status
     },
 
@@ -25,7 +32,7 @@ export const useMainStore = defineStore('main', {
     },
 
     LISTEN_WIN_STATUS() {
-      window.electron.ipcRenderer.on('mt::window-active-status', (e, { status }) => {
+      window.electron.ipcRenderer.on('mt::window-active-status', (_, { status }: { status: boolean }) => {
         this.windowActive = status
       })
     }

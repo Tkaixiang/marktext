@@ -8,8 +8,18 @@ import { getFileStateFromData } from './help'
 import { useLayoutStore } from './layout'
 import { useEditorStore } from './editor'
 
+interface ProjectState {
+  activeItem: any
+  createCache: any
+  newFileNameCache: string
+  renameCache: string | null
+  clipboard: any
+  projectTree: any
+  pendingTreeEvents: any[]
+}
+
 export const useProjectStore = defineStore('project', {
-  state: () => ({
+  state: (): ProjectState => ({
     activeItem: {},
     createCache: {},
     // Use to cache newly created filename, for open immediately.
@@ -25,15 +35,15 @@ export const useProjectStore = defineStore('project', {
     LISTEN_FOR_LOAD_PROJECT() {
       const layoutStore = useLayoutStore()
       window.electron.ipcRenderer.on('mt::open-directory', (e, pathname) => {
-        let name = window.path.basename(pathname)
+        let name = window.path.basename(pathname as string)
         if (!name) {
           // Root directory such as "/" or "C:\"
-          name = pathname
+          name = pathname as string
         }
 
         this.projectTree = {
           // Root full path
-          pathname: window.path.normalize(pathname),
+          pathname: window.path.normalize(pathname as string),
           // Root directory name
           name,
           isDirectory: true,
@@ -59,7 +69,7 @@ export const useProjectStore = defineStore('project', {
     },
 
     LISTEN_FOR_UPDATE_PROJECT() {
-      window.electron.ipcRenderer.on('mt::update-object-tree', (e, { type, change }) => {
+      window.electron.ipcRenderer.on('mt::update-object-tree', (e, { type, change }: any) => {
         // Buffer events if projectTree is not initialized yet
         if (!this.projectTree) {
           this.pendingTreeEvents.push({ type, change })
@@ -69,7 +79,7 @@ export const useProjectStore = defineStore('project', {
       })
     },
 
-    _processTreeEvent(type, change) {
+    _processTreeEvent(type: string, change: any) {
       const editorStore = useEditorStore()
       switch (type) {
         case 'add': {
@@ -102,11 +112,11 @@ export const useProjectStore = defineStore('project', {
       }
     },
 
-    CHANGE_ACTIVE_ITEM(activeItem) {
+    CHANGE_ACTIVE_ITEM(activeItem: any) {
       this.activeItem = activeItem
     },
 
-    CHANGE_CLIPBOARD(data) {
+    CHANGE_CLIPBOARD(data: any) {
       this.clipboard = data
     },
 
@@ -119,7 +129,7 @@ export const useProjectStore = defineStore('project', {
         const { pathname } = this.activeItem
         window.electron.shell.showItemInFolder(pathname)
       })
-      bus.on('SIDEBAR::new', (type) => {
+      bus.on('SIDEBAR::new', (type: any) => {
         const { pathname, isDirectory } = this.activeItem
         const dirname = isDirectory ? pathname : window.path.dirname(pathname)
         this.createCache = { dirname, type }
@@ -127,7 +137,7 @@ export const useProjectStore = defineStore('project', {
       })
       bus.on('SIDEBAR::remove', () => {
         const { pathname } = this.activeItem
-        window.electron.ipcRenderer.invoke('mt::fs-trash-item', pathname).catch((err) => {
+        window.electron.ipcRenderer.invoke('mt::fs-trash-item', pathname).catch((err: any) => {
           notice.notify({
             title: 'Error while deleting',
             type: 'error',
@@ -135,7 +145,7 @@ export const useProjectStore = defineStore('project', {
           })
         })
       })
-      bus.on('SIDEBAR::copy-cut', (type) => {
+      bus.on('SIDEBAR::copy-cut', (type: any) => {
         const { pathname: src } = this.activeItem
         this.clipboard = { type, src }
       })
@@ -159,7 +169,7 @@ export const useProjectStore = defineStore('project', {
             .then(() => {
               this.clipboard = null
             })
-            .catch((err) => {
+            .catch((err: any) => {
               notice.notify({
                 title: 'Error while pasting',
                 type: 'error',
@@ -175,7 +185,7 @@ export const useProjectStore = defineStore('project', {
       })
     },
 
-    CREATE_FILE_DIRECTORY(name) {
+    CREATE_FILE_DIRECTORY(name: string) {
       const { dirname, type } = this.createCache
 
       if (type === 'file' && !window.fileUtils.hasMarkdownExtension(name)) {
@@ -191,7 +201,7 @@ export const useProjectStore = defineStore('project', {
             this.newFileNameCache = fullName
           }
         })
-        .catch((err) => {
+        .catch((err: any) => {
           notice.notify({
             title: 'Error in Side Bar',
             type: 'error',
@@ -200,12 +210,15 @@ export const useProjectStore = defineStore('project', {
         })
     },
 
-    RENAME_IN_SIDEBAR(name) {
+    RENAME_IN_SIDEBAR(name: string) {
+      // @ts-ignore
       const editorStore = useEditorStore()
       const src = this.renameCache
+      if (!src) return
       const dirname = window.path.dirname(src)
       const dest = dirname + PATH_SEPARATOR + name
       rename(src, dest).then(() => {
+        // @ts-ignore
         editorStore.RENAME_IF_NEEDED({ src, dest })
       })
     },
