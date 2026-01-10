@@ -8,7 +8,7 @@ import { BLACK_LIST } from '../config'
 
 // TODO(need::refactor): Refactor this file. Just return an array of directories and files without caching and watching?
 
-interface FileInfo {
+export interface FileInfo {
   file: string
   type: string
 }
