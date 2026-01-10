@@ -1,3 +1,4 @@
+import { MenuItemConstructorOptions } from 'electron'
 import edit from './edit'
 import prefEdit from './prefEdit'
 import file from './file'
@@ -10,12 +11,13 @@ import format from './format'
 import theme from './theme'
 
 export { default as dockMenu } from './dock'
+
 /**
  * Create the setting window menu.
  *
  * @param {Keybindings} keybindings The keybindings instance
  */
-export const configSettingMenu = (keybindings) => {
+export const configSettingMenu = (keybindings: any): MenuItemConstructorOptions[] => {
   return [
     ...(process.platform === 'darwin' ? [marktext(keybindings)] : []),
     prefEdit(keybindings),
@@ -30,7 +32,7 @@ export const configSettingMenu = (keybindings) => {
  * @param {Preference} preferences The preference instance.
  * @param {string[]} recentlyUsedFiles The recently used files.
  */
-export default function (keybindings, preferences, recentlyUsedFiles) {
+export default function (keybindings: any, preferences: any, recentlyUsedFiles: string[]): MenuItemConstructorOptions[] {
   return [
     ...(process.platform === 'darwin' ? [marktext(keybindings)] : []),
     file(keybindings, preferences, recentlyUsedFiles),

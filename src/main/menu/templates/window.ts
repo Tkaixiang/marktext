@@ -1,18 +1,18 @@
-import { Menu } from 'electron'
+import { Menu, MenuItemConstructorOptions, BrowserWindow } from 'electron'
 import { minimizeWindow, toggleAlwaysOnTop, toggleFullScreen } from '../actions/window'
 import { zoomIn, zoomOut } from '../../windows/utils'
 import { isOsx } from '../../config'
 import { t } from '../../i18n'
 
-export default function(keybindings) {
-    const menu = {
+export default function(keybindings: any): MenuItemConstructorOptions {
+    const menu: MenuItemConstructorOptions = {
         label: t('menu.window.title'),
         role: 'window',
         submenu: [{
             label: t('menu.window.minimize'),
             accelerator: keybindings.getAccelerator('window.minimize'),
             click(menuItem, browserWindow) {
-                minimizeWindow(browserWindow)
+                minimizeWindow(browserWindow as BrowserWindow)
             }
         }, {
             id: 'alwaysOnTopMenuItem',
@@ -20,7 +20,7 @@ export default function(keybindings) {
             type: 'checkbox',
             accelerator: keybindings.getAccelerator('window.toggle-always-on-top'),
             click(menuItem, browserWindow) {
-                toggleAlwaysOnTop(browserWindow)
+                toggleAlwaysOnTop(browserWindow as BrowserWindow)
             }
         }, {
             type: 'separator'
@@ -28,13 +28,13 @@ export default function(keybindings) {
             label: t('menu.window.zoomIn'),
             accelerator: keybindings.getAccelerator('window.zoomIn'),
             click(menuItem, browserWindow) {
-                zoomIn(browserWindow)
+                zoomIn(browserWindow as BrowserWindow)
             }
         }, {
             label: t('menu.window.zoomOut'),
             accelerator: keybindings.getAccelerator('window.zoomOut'),
             click(menuItem, browserWindow) {
-                zoomOut(browserWindow)
+                zoomOut(browserWindow as BrowserWindow)
             }
         }, {
             type: 'separator'
@@ -43,14 +43,16 @@ export default function(keybindings) {
             accelerator: keybindings.getAccelerator('window.toggle-full-screen'),
             click(item, browserWindow) {
                 if (browserWindow) {
-                    toggleFullScreen(browserWindow)
+                    toggleFullScreen(browserWindow as BrowserWindow)
                 }
             }
         }]
     }
 
+    const submenu = menu.submenu as MenuItemConstructorOptions[]
+
     if (isOsx) {
-        menu.submenu.push({
+        submenu.push({
             label: t('menu.window.bringAllToFront'),
             click() {
                 Menu.sendActionToFirstResponder('arrangeInFront:')

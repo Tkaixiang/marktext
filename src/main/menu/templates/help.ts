@@ -1,12 +1,12 @@
 import path from 'path'
-import { shell } from 'electron'
+import { shell, MenuItemConstructorOptions, BrowserWindow } from 'electron'
 import { isFile } from 'common/filesystem'
 import * as actions from '../actions/help'
 import { checkUpdates } from '../actions/marktext'
 import { t } from '../../i18n'
 
 /// Check whether the package is updatable at runtime.
-const isUpdatable = () => {
+const isUpdatable = (): boolean => {
   // TODO: If not updatable, allow to check whether there is a new version available.
 
   const resFile = isFile(path.join(process.resourcesPath, 'app-update.yml'))
@@ -28,8 +28,8 @@ const isUpdatable = () => {
   return false
 }
 
-export default function () {
-  const helpMenu = {
+export default function (): MenuItemConstructorOptions {
+  const helpMenu: MenuItemConstructorOptions = {
     label: t('menu.help.help'),
     role: 'help',
     submenu: [
@@ -80,29 +80,31 @@ export default function () {
     ]
   }
 
+  const submenu = helpMenu.submenu as MenuItemConstructorOptions[]
+
   if (isUpdatable()) {
-    helpMenu.submenu.push(
+    submenu.push(
       {
         type: 'separator'
       },
       {
         label: t('menu.help.checkUpdates'),
         click(menuItem, browserWindow) {
-          checkUpdates(browserWindow)
+          checkUpdates(browserWindow as BrowserWindow)
         }
       }
     )
   }
 
   if (process.platform !== 'darwin') {
-    helpMenu.submenu.push(
+    submenu.push(
       {
         type: 'separator'
       },
       {
         label: t('menu.help.about'),
         click(menuItem, browserWindow) {
-          actions.showAboutDialog(browserWindow)
+          actions.showAboutDialog(browserWindow as BrowserWindow)
         }
       }
     )

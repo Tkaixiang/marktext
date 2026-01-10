@@ -1,74 +1,74 @@
-import { COMMANDS } from '../../commands'
-import { ipcMain } from 'electron'
+import { BrowserWindow, Menu, ipcMain } from 'electron'
+import { COMMANDS, CommandManagerClass } from '../../commands'
 
 const typewriterModeMenuItemId = 'typewriterModeMenuItem'
 const focusModeMenuItemId = 'focusModeMenuItem'
 
-const toggleTypeMode = (win, type) => {
+const toggleTypeMode = (win: BrowserWindow, type: string): void => {
   if (win && win.webContents) {
     win.webContents.send('mt::toggle-view-mode-entry', type)
   }
 }
 
-const setLayout = (win, type, value) => {
+const setLayout = (win: BrowserWindow, type: string, value: boolean | string): void => {
   if (win && win.webContents) {
     win.webContents.send('mt::set-view-layout', { [type]: value })
   }
 }
 
-const toggleLayout = (win, type) => {
+const toggleLayout = (win: BrowserWindow, type: string): void => {
   if (win && win.webContents) {
     win.webContents.send('mt::toggle-view-layout-entry', type)
   }
 }
 
-export const debugToggleDevTools = (win) => {
-  if (win && global.MARKTEXT_DEBUG) {
+export const debugToggleDevTools = (win: BrowserWindow): void => {
+  if (win && !!global.MARKTEXT_DEBUG) {
     win.webContents.toggleDevTools()
   }
 }
 
-export const debugReloadWindow = (win) => {
-  if (win && global.MARKTEXT_DEBUG) {
+export const debugReloadWindow = (win: BrowserWindow): void => {
+  if (win && !!global.MARKTEXT_DEBUG) {
     ipcMain.emit('window-reload-by-id', win.id)
   }
 }
 
-export const showCommandPalette = (win) => {
+export const showCommandPalette = (win: BrowserWindow): void => {
   if (win && win.webContents) {
     win.webContents.send('mt::show-command-palette')
   }
 }
 
-export const toggleFocusMode = (win) => {
+export const toggleFocusMode = (win: BrowserWindow): void => {
   toggleTypeMode(win, 'focus')
 }
 
-export const toggleSourceCodeMode = (win) => {
+export const toggleSourceCodeMode = (win: BrowserWindow): void => {
   toggleTypeMode(win, 'sourceCode')
 }
 
-export const toggleSidebar = (win) => {
+export const toggleSidebar = (win: BrowserWindow): void => {
   toggleLayout(win, 'showSideBar')
 }
 
-export const toggleTabBar = (win) => {
+export const toggleTabBar = (win: BrowserWindow): void => {
   toggleLayout(win, 'showTabBar')
 }
 
-export const showTabBar = (win) => {
+export const showTabBar = (win: BrowserWindow): void => {
   setLayout(win, 'showTabBar', true)
 }
 
-export const showTableOfContents = (win) => {
+export const showTableOfContents = (win: BrowserWindow): void => {
   setLayout(win, 'rightColumn', 'toc')
 }
 
-export const toggleTypewriterMode = (win) => {
+export const toggleTypewriterMode = (win: BrowserWindow): void => {
   toggleTypeMode(win, 'typewriter')
 }
 
-export const reloadImageCache = (win) => {
+export const reloadImageCache = (win: BrowserWindow): void => {
   if (win && win.webContents) {
     win.webContents.send('mt::invalidate-image-cache')
   }
@@ -76,7 +76,7 @@ export const reloadImageCache = (win) => {
 
 // --- Commands -------------------------------------------------------------
 
-export const loadViewCommands = (commandManager) => {
+export const loadViewCommands = (commandManager: CommandManagerClass): void => {
   commandManager.add(COMMANDS.VIEW_COMMAND_PALETTE, showCommandPalette)
   commandManager.add(COMMANDS.VIEW_FOCUS_MODE, toggleFocusMode)
   commandManager.add(COMMANDS.VIEW_FORCE_RELOAD_IMAGES, reloadImageCache)
@@ -100,18 +100,22 @@ export const loadViewCommands = (commandManager) => {
  * @param {Electron.Menu} applicationMenu The application menu instance.
  * @param {*} changes Array of changed view settings (e.g. [ {showSideBar: true} ]).
  */
-export const viewLayoutChanged = (applicationMenu, changes) => {
-  const disableMenuByName = (id, value) => {
+export const viewLayoutChanged = (applicationMenu: Menu, changes: Record<string, boolean>): void => {
+  const disableMenuByName = (id: string, value: boolean): void => {
     const menuItem = applicationMenu.getMenuItemById(id)
-    menuItem.enabled = value
+    if (menuItem) {
+      menuItem.enabled = value
+    }
   }
-  const changeMenuByName = (id, value) => {
+  const changeMenuByName = (id: string, value: boolean): void => {
     const menuItem = applicationMenu.getMenuItemById(id)
-    menuItem.checked = value
+    if (menuItem) {
+      menuItem.checked = value
+    }
   }
 
   for (const key in changes) {
-    const value = changes[key]
+    const value = !!changes[key]
     switch (key) {
       case 'showSideBar':
         changeMenuByName('sideBarMenuItem', value)

@@ -1,7 +1,8 @@
+import { MenuItemConstructorOptions, BrowserWindow } from 'electron'
 import * as actions from '../actions/theme'
 import { t } from '../../i18n'
 
-export default function (userPreference) {
+export default function (userPreference: any): MenuItemConstructorOptions {
   const { theme } = userPreference.getAll()
   return {
     label: t('menu.theme.theme'),

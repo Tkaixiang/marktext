@@ -1,6 +1,7 @@
+import { MenuItemConstructorOptions } from 'electron'
 import { t } from '../../i18n'
 
-export default function (keybindings) {
+export default function (keybindings: any): MenuItemConstructorOptions {
   return {
     label: t('menu.edit.edit'),
     submenu: [{

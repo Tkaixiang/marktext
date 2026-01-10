@@ -1,4 +1,5 @@
-import { COMMANDS } from '../../commands'
+import { BrowserWindow, Menu } from 'electron'
+import { COMMANDS, CommandManagerClass } from '../../commands'
 
 const MENU_ID_FORMAT_MAP = Object.freeze({
   strongMenuItem: 'strong',
@@ -10,63 +11,63 @@ const MENU_ID_FORMAT_MAP = Object.freeze({
   inlineMathMenuItem: 'inline_math'
 })
 
-const format = (win, type) => {
+const format = (win: BrowserWindow, type: string): void => {
   if (win && win.webContents) {
     win.webContents.send('mt::editor-format-action', { type })
   }
 }
 
-export const clearFormat = win => {
+export const clearFormat = (win: BrowserWindow): void => {
   format(win, 'clear')
 }
 
-export const emphasis = win => {
+export const emphasis = (win: BrowserWindow): void => {
   format(win, 'em')
 }
 
-export const highlight = win => {
+export const highlight = (win: BrowserWindow): void => {
   format(win, 'mark')
 }
 
-export const hyperlink = win => {
+export const hyperlink = (win: BrowserWindow): void => {
   format(win, 'link')
 }
 
-export const image = win => {
+export const image = (win: BrowserWindow): void => {
   format(win, 'image')
 }
 
-export const inlineCode = win => {
+export const inlineCode = (win: BrowserWindow): void => {
   format(win, 'inline_code')
 }
 
-export const inlineMath = win => {
+export const inlineMath = (win: BrowserWindow): void => {
   format(win, 'inline_math')
 }
 
-export const strikethrough = win => {
+export const strikethrough = (win: BrowserWindow): void => {
   format(win, 'del')
 }
 
-export const strong = win => {
+export const strong = (win: BrowserWindow): void => {
   format(win, 'strong')
 }
 
-export const subscript = win => {
+export const subscript = (win: BrowserWindow): void => {
   format(win, 'sub')
 }
 
-export const superscript = win => {
+export const superscript = (win: BrowserWindow): void => {
   format(win, 'sup')
 }
 
-export const underline = win => {
+export const underline = (win: BrowserWindow): void => {
   format(win, 'u')
 }
 
 // --- Commands -------------------------------------------------------------
 
-export const loadFormatCommands = commandManager => {
+export const loadFormatCommands = (commandManager: CommandManagerClass): void => {
   commandManager.add(COMMANDS.FORMAT_CLEAR_FORMAT, clearFormat)
   commandManager.add(COMMANDS.FORMAT_EMPHASIS, emphasis)
   commandManager.add(COMMANDS.FORMAT_HIGHLIGHT, highlight)
@@ -92,13 +93,15 @@ export const loadFormatCommands = commandManager => {
  * @param {Electron.Menu} applicationMenu The application menu instance.
  * @param {Object.<string, boolean>} formats A object map with selected formats.
  */
-export const updateFormatMenu = (applicationMenu, formats) => {
+export const updateFormatMenu = (applicationMenu: Menu, formats: Record<string, boolean>): void => {
   const formatMenuItem = applicationMenu.getMenuItemById('formatMenuItem')
-  formatMenuItem.submenu.items.forEach(item => (item.checked = false))
-  formatMenuItem.submenu.items
-    .forEach(item => {
-      if (item.id && formats[MENU_ID_FORMAT_MAP[item.id]]) {
-        item.checked = true
-      }
-    })
+  if (formatMenuItem && formatMenuItem.submenu) {
+    formatMenuItem.submenu.items.forEach(item => (item.checked = false))
+    formatMenuItem.submenu.items
+      .forEach(item => {
+        if (item.id && formats[MENU_ID_FORMAT_MAP[item.id as keyof typeof MENU_ID_FORMAT_MAP]]) {
+          item.checked = true
+        }
+      })
+  }
 }

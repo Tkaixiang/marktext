@@ -1,14 +1,15 @@
+import { MenuItemConstructorOptions, BrowserWindow } from 'electron'
 import * as actions from '../actions/view'
 import { t } from '../../i18n'
 
-export default function (keybindings) {
-  const viewMenu = {
+export default function (keybindings: any): MenuItemConstructorOptions {
+  const viewMenu: MenuItemConstructorOptions = {
     label: t('menu.view.view'),
     submenu: [{
       label: t('menu.view.commandPalette'),
       accelerator: keybindings.getAccelerator('view.command-palette'),
       click (menuItem, focusedWindow) {
-        actions.showCommandPalette(focusedWindow)
+        actions.showCommandPalette(focusedWindow as BrowserWindow)
       }
     }, {
       type: 'separator'
@@ -19,7 +20,7 @@ export default function (keybindings) {
       type: 'checkbox',
       checked: false,
       click (item, focusedWindow) {
-        actions.toggleSourceCodeMode(focusedWindow)
+        actions.toggleSourceCodeMode(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'typewriterModeMenuItem',
@@ -28,7 +29,7 @@ export default function (keybindings) {
       type: 'checkbox',
       checked: false,
       click (item, focusedWindow) {
-        actions.toggleTypewriterMode(focusedWindow)
+        actions.toggleTypewriterMode(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'focusModeMenuItem',
@@ -37,7 +38,7 @@ export default function (keybindings) {
       type: 'checkbox',
       checked: false,
       click (item, focusedWindow) {
-        actions.toggleFocusMode(focusedWindow)
+        actions.toggleFocusMode(focusedWindow as BrowserWindow)
       }
     }, {
       type: 'separator'
@@ -48,7 +49,7 @@ export default function (keybindings) {
       type: 'checkbox',
       checked: false,
       click (item, focusedWindow) {
-        actions.toggleSidebar(focusedWindow)
+        actions.toggleSidebar(focusedWindow as BrowserWindow)
       }
     }, {
       label: t('menu.view.toggleTabbar'),
@@ -57,40 +58,42 @@ export default function (keybindings) {
       type: 'checkbox',
       checked: false,
       click (item, focusedWindow) {
-        actions.toggleTabBar(focusedWindow)
+        actions.toggleTabBar(focusedWindow as BrowserWindow)
       }
     }, {
       label: t('menu.view.toggleTableOfContents'),
       id: 'tocMenuItem',
       accelerator: keybindings.getAccelerator('view.toggle-toc'),
       click (_, focusedWindow) {
-        actions.showTableOfContents(focusedWindow)
+        actions.showTableOfContents(focusedWindow as BrowserWindow)
       }
     }, {
       label: t('menu.view.reloadImages'),
       accelerator: keybindings.getAccelerator('view.reload-images'),
       click (item, focusedWindow) {
-        actions.reloadImageCache(focusedWindow)
+        actions.reloadImageCache(focusedWindow as BrowserWindow)
       }
     }]
   }
 
+  const submenu = viewMenu.submenu as MenuItemConstructorOptions[]
+
   if (global.MARKTEXT_DEBUG) {
-    viewMenu.submenu.push({
+    submenu.push({
       type: 'separator'
     })
-    viewMenu.submenu.push({
+    submenu.push({
       label: t('menu.view.showDeveloperTools'),
       accelerator: keybindings.getAccelerator('view.toggle-dev-tools'),
       click (item, win) {
-        actions.debugToggleDevTools(win)
+        actions.debugToggleDevTools(win as BrowserWindow)
       }
     })
-    viewMenu.submenu.push({
+    submenu.push({
       label: t('menu.view.reloadWindow'),
       accelerator: keybindings.getAccelerator('view.dev-reload'),
       click (item, focusedWindow) {
-        actions.debugReloadWindow(focusedWindow)
+        actions.debugReloadWindow(focusedWindow as BrowserWindow)
       }
     })
   }

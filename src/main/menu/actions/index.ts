@@ -1,3 +1,4 @@
+import { CommandManagerClass } from '../../commands'
 import { loadEditCommands } from './edit'
 import { loadFileCommands } from './file'
 import { loadFormatCommands } from './format'
@@ -6,7 +7,7 @@ import { loadParagraphCommands } from './paragraph'
 import { loadViewCommands } from './view'
 import { loadWindowCommands } from './window'
 
-export const loadMenuCommands = commandManager => {
+export const loadMenuCommands = (commandManager: CommandManagerClass): void => {
   loadEditCommands(commandManager)
   loadFileCommands(commandManager)
   loadFormatCommands(commandManager)

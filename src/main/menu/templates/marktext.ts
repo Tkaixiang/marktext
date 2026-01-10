@@ -1,22 +1,22 @@
-import { app } from 'electron'
+import { app, MenuItemConstructorOptions, BrowserWindow } from 'electron'
 import { showAboutDialog } from '../actions/help'
 import * as actions from '../actions/marktext'
 import { t } from '../../i18n'
 
 // macOS only menu.
 
-export default function (keybindings) {
+export default function (keybindings: any): MenuItemConstructorOptions {
   return {
     label: t('menu.marktext.title'),
     submenu: [{
       label: t('menu.marktext.about'),
       click (menuItem, focusedWindow) {
-        showAboutDialog(focusedWindow)
+        showAboutDialog(focusedWindow as BrowserWindow)
       }
     }, {
       label: t('menu.marktext.checkUpdates'),
       click (menuItem, focusedWindow) {
-        actions.checkUpdates(focusedWindow)
+        actions.checkUpdates(focusedWindow as BrowserWindow)
       }
     }, {
       label: t('menu.marktext.preferences'),

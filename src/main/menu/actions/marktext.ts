@@ -1,19 +1,18 @@
 import { autoUpdater } from 'electron-updater'
-import { BrowserWindow, Menu } from 'electron'
-import { COMMANDS } from '../../commands'
+import { BrowserWindow, Menu, ipcMain } from 'electron'
+import { COMMANDS, CommandManagerClass } from '../../commands'
 import { isOsx } from '../../config'
-import { ipcMain } from 'electron'
 
 let runningUpdate = false
-let win = null
+let win: BrowserWindow | null = null
 
 autoUpdater.autoDownload = false
 
-autoUpdater.on('error', (error) => {
+autoUpdater.on('error', (error: Error | string | null) => {
   if (win) {
     win.webContents.send(
       'mt::UPDATE_ERROR',
-      error === null ? 'Error: unknown' : (error.message || error).toString()
+      error === null ? 'Error: unknown' : (typeof error === 'string' ? error : error.message).toString()
     )
   }
 })
@@ -48,7 +47,7 @@ autoUpdater.on('update-downloaded', () => {
   setImmediate(() => autoUpdater.quitAndInstall())
 })
 
-ipcMain.on('mt::NEED_UPDATE', (e, { needUpdate }) => {
+ipcMain.on('mt::NEED_UPDATE', (_e, { needUpdate }: { needUpdate: boolean }) => {
   if (needUpdate) {
     autoUpdater.downloadUpdate()
   } else {
@@ -58,16 +57,18 @@ ipcMain.on('mt::NEED_UPDATE', (e, { needUpdate }) => {
 
 ipcMain.on('mt::check-for-update', (e) => {
   const win = BrowserWindow.fromWebContents(e.sender)
-  checkUpdates(win)
+  if (win) {
+    checkUpdates(win)
+  }
 })
 
 // --------------------------------------------------------
 
-export const userSetting = () => {
+export const userSetting = (): void => {
   ipcMain.emit('app-create-settings-window')
 }
 
-export const checkUpdates = (browserWindow) => {
+export const checkUpdates = (browserWindow: BrowserWindow): void => {
   if (!runningUpdate) {
     runningUpdate = true
     win = browserWindow
@@ -75,19 +76,19 @@ export const checkUpdates = (browserWindow) => {
   }
 }
 
-export const osxHide = () => {
+export const osxHide = (): void => {
   if (isOsx) {
     Menu.sendActionToFirstResponder('hide:')
   }
 }
 
-export const osxHideAll = () => {
+export const osxHideAll = (): void => {
   if (isOsx) {
     Menu.sendActionToFirstResponder('hideOtherApplications:')
   }
 }
 
-export const osxShowAll = () => {
+export const osxShowAll = (): void => {
   if (isOsx) {
     Menu.sendActionToFirstResponder('unhideAllApplications:')
   }
@@ -95,7 +96,7 @@ export const osxShowAll = () => {
 
 // --- Commands -------------------------------------------------------------
 
-export const loadMarktextCommands = (commandManager) => {
+export const loadMarktextCommands = (commandManager: CommandManagerClass): void => {
   commandManager.add(COMMANDS.MT_HIDE, osxHide)
   commandManager.add(COMMANDS.MT_HIDE_OTHERS, osxHideAll)
 }

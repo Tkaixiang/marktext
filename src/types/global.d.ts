@@ -52,6 +52,8 @@ declare global {
       }
       __static: string
       MARKTEXT_IS_STABLE: boolean
+      MARKTEXT_DEBUG: boolean
+      MARKTEXT_SAFE_MODE: boolean
     }
   }
 
@@ -63,6 +65,8 @@ declare global {
   }
   var __static: string
   var MARKTEXT_IS_STABLE: boolean
+  var MARKTEXT_DEBUG: boolean
+  var MARKTEXT_SAFE_MODE: boolean
 }
 
 declare module 'ced' {

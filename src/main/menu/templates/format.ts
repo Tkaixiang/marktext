@@ -1,7 +1,8 @@
+import { MenuItemConstructorOptions, BrowserWindow } from 'electron'
 import * as actions from '../actions/format'
 import { t } from '../../i18n'
 
-export default function (keybindings) {
+export default function (keybindings: any): MenuItemConstructorOptions {
   return {
     id: 'formatMenuItem',
     label: t('menu.format.format'),
@@ -11,7 +12,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.strong'),
       click (menuItem, focusedWindow) {
-        actions.strong(focusedWindow)
+        actions.strong(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'emphasisMenuItem',
@@ -19,7 +20,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.emphasis'),
       click (menuItem, focusedWindow) {
-        actions.emphasis(focusedWindow)
+        actions.emphasis(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'underlineMenuItem',
@@ -27,7 +28,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.underline'),
       click (menuItem, focusedWindow) {
-        actions.underline(focusedWindow)
+        actions.underline(focusedWindow as BrowserWindow)
       }
     }, {
       type: 'separator'
@@ -37,7 +38,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.superscript'),
       click (menuItem, focusedWindow) {
-        actions.superscript(focusedWindow)
+        actions.superscript(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'subscriptMenuItem',
@@ -45,7 +46,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.subscript'),
       click (menuItem, focusedWindow) {
-        actions.subscript(focusedWindow)
+        actions.subscript(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'highlightMenuItem',
@@ -53,7 +54,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.highlight'),
       click (menuItem, focusedWindow) {
-        actions.highlight(focusedWindow)
+        actions.highlight(focusedWindow as BrowserWindow)
       }
     }, {
       type: 'separator'
@@ -63,7 +64,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.inline-code'),
       click (menuItem, focusedWindow) {
-        actions.inlineCode(focusedWindow)
+        actions.inlineCode(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'inlineMathMenuItem',
@@ -71,7 +72,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.inline-math'),
       click (menuItem, focusedWindow) {
-        actions.inlineMath(focusedWindow)
+        actions.inlineMath(focusedWindow as BrowserWindow)
       }
     }, {
       type: 'separator'
@@ -81,7 +82,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.strike'),
       click (menuItem, focusedWindow) {
-        actions.strikethrough(focusedWindow)
+        actions.strikethrough(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'hyperlinkMenuItem',
@@ -89,7 +90,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.hyperlink'),
       click (menuItem, focusedWindow) {
-        actions.hyperlink(focusedWindow)
+        actions.hyperlink(focusedWindow as BrowserWindow)
       }
     }, {
       id: 'imageMenuItem',
@@ -97,7 +98,7 @@ export default function (keybindings) {
       type: 'checkbox',
       accelerator: keybindings.getAccelerator('format.image'),
       click (menuItem, focusedWindow) {
-        actions.image(focusedWindow)
+        actions.image(focusedWindow as BrowserWindow)
       }
     }, {
       type: 'separator'
@@ -105,7 +106,7 @@ export default function (keybindings) {
       label: t('menu.format.clearFormat'),
       accelerator: keybindings.getAccelerator('format.clear-format'),
       click (menuItem, focusedWindow) {
-        actions.clearFormat(focusedWindow)
+        actions.clearFormat(focusedWindow as BrowserWindow)
       }
     }]
   }

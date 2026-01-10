@@ -1,11 +1,11 @@
-import { app, Menu } from 'electron'
+import { app, Menu, MenuItemConstructorOptions, BrowserWindow } from 'electron'
 import * as actions from '../actions/file'
 
-const dockMenu = Menu.buildFromTemplate([{
+const dockMenuTemplate: MenuItemConstructorOptions[] = [{
   label: 'Open...',
   click (menuItem, browserWindow) {
     if (browserWindow) {
-      actions.openFile(browserWindow)
+      actions.openFile(browserWindow as BrowserWindow)
     } else {
       actions.newEditorWindow()
     }
@@ -15,6 +15,8 @@ const dockMenu = Menu.buildFromTemplate([{
   click () {
     app.clearRecentDocuments()
   }
-}])
+}]
+
+const dockMenu = Menu.buildFromTemplate(dockMenuTemplate)
 
 export default dockMenu
