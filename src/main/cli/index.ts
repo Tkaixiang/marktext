@@ -2,13 +2,13 @@ import path from 'path'
 import { app } from 'electron'
 import os from 'os'
 import { isDirectory } from 'common/filesystem'
-import parseArgs from './parser'
+import parseArgs, { CLIArguments } from './parser'
 import { getPath } from '../utils'
 
-const write = (s) => process.stdout.write(s)
-const writeLine = (s) => write(s + '\n')
+const write = (s: string) => process.stdout.write(s)
+const writeLine = (s: string) => write(s + '\n')
 
-const cli = () => {
+const cli = (): CLIArguments => {
   let argv = process.argv.slice(1)
   if (process.env.NODE_ENV === 'development') {
     // Don't pass electron development arguments to MarkText and change user data path.
