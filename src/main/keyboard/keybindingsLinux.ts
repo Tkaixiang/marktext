@@ -1,8 +1,11 @@
-// Key bindings for Windows.
+// Key bindings for Linux.
 
-// NOTE: Avoid `Ctrl+Alt` and `AltGr` shortcuts on Windows because these are used to produce alternative characters.
-//       Unlike Linux, `Ctrl+Alt` is an alias to `AltGr` on Windows and will produce alternative characters too.
-//       We'll should try bind no keys to `Alt` "modifiers" because there are only a few key bindings available.
+// NOTE: Avoid `Ctrl+Alt` and `Alt` shortcuts on Linux because Ubuntu based OSs have reserved system shortcuts (see GH#2370).
+//       Binding shortcuts to these modifiers will result in odd behavior on Ubuntu.
+// NOTE: Don't use `Ctrl+Shift+U` because it's used IBus for unicode support.
+// NOTE: We can't determine the character for a dead key and no translation is provided. E.g. Ctrl+` (=Ctrl+Shift+´) on a
+//       none nodeadkeys german keyboard cannot be interpreted. In general don't bind default shortcuts to characters that
+//       can be produced with ^ or ` on any keyboard. --> ^, `, ", ~, ...
 
 export default new Map([
     // MarkText menu on macOS only
@@ -18,7 +21,7 @@ export default new Map([
     ['file.save-as', 'Ctrl+Shift+S'],
     ['file.move-file', ''],
     ['file.rename-file', ''],
-    ['file.print', 'Ctrl+P'],
+    ['file.print', ''],
     ['file.preferences', 'Ctrl+,'],
     ['file.close-tab', 'Ctrl+W'],
     ['file.close-window', 'Ctrl+Shift+W'],
@@ -37,7 +40,7 @@ export default new Map([
     ['edit.copy-as-html', ''],
     ['edit.paste-as-plaintext', 'Ctrl+Shift+V'],
     ['edit.select-all', 'Ctrl+A'],
-    ['edit.duplicate', 'Ctrl+Alt+D'],
+    ['edit.duplicate', 'Ctrl+Shift+E'],
     ['edit.create-paragraph', 'Ctrl+Shift+N'],
     ['edit.delete-paragraph', 'Ctrl+Shift+D'],
     ['edit.find', 'Ctrl+F'],
@@ -48,28 +51,26 @@ export default new Map([
     ['edit.screenshot', ''], // macOS only
 
     // Paragraph menu
-    // NOTE: We cannot set a default value for heading size because `Ctrl+Alt` is an alias
-    //       to `AltGr` on Windows and `Ctrl+Shift+1` is mapped to the underlying character.
-    ['paragraph.heading-1', ''],
-    ['paragraph.heading-2', ''],
-    ['paragraph.heading-3', ''],
-    ['paragraph.heading-4', ''],
-    ['paragraph.heading-5', ''],
-    ['paragraph.heading-6', ''],
+    ['paragraph.heading-1', 'Ctrl+Alt+1'],
+    ['paragraph.heading-2', 'Ctrl+Alt+2'],
+    ['paragraph.heading-3', 'Ctrl+Alt+3'],
+    ['paragraph.heading-4', 'Ctrl+Alt+4'],
+    ['paragraph.heading-5', 'Ctrl+Alt+5'],
+    ['paragraph.heading-6', 'Ctrl+Alt+6'],
     ['paragraph.upgrade-heading', 'Ctrl+Plus'],
     ['paragraph.degrade-heading', 'Ctrl+-'],
     ['paragraph.table', 'Ctrl+Shift+T'],
     ['paragraph.code-fence', 'Ctrl+Shift+K'],
     ['paragraph.quote-block', 'Ctrl+Shift+Q'],
-    ['paragraph.math-formula', 'Ctrl+Alt+N'],
+    ['paragraph.math-formula', 'Ctrl+Alt+M'],
     ['paragraph.html-block', 'Ctrl+Alt+H'],
     ['paragraph.order-list', 'Ctrl+G'],
     ['paragraph.bullet-list', 'Ctrl+H'],
-    ['paragraph.task-list', 'Ctrl+Alt+X'],
-    ['paragraph.loose-list-item', 'Ctrl+Alt+L'],
+    ['paragraph.task-list', 'Ctrl+Shift+X'],
+    ['paragraph.loose-list-item', 'Ctrl+Shift+L'],
     ['paragraph.paragraph', 'Ctrl+Shift+0'],
-    ['paragraph.horizontal-line', 'Ctrl+Shift+U'],
-    ['paragraph.front-matter', 'Ctrl+Alt+Y'],
+    ['paragraph.horizontal-line', 'Ctrl+_'], // Ctrl+Shift+-
+    ['paragraph.front-matter', 'Ctrl+Shift+Y'],
 
     // Format menu
     ['format.strong', 'Ctrl+B'],
@@ -78,7 +79,7 @@ export default new Map([
     ['format.superscript', ''],
     ['format.subscript', ''],
     ['format.highlight', 'Ctrl+Shift+H'],
-    ['format.inline-code', 'Ctrl+`'],
+    ['format.inline-code', 'Ctrl+Y'],
     ['format.inline-math', 'Ctrl+Shift+M'],
     ['format.strike', 'Ctrl+D'],
     ['format.hyperlink', 'Ctrl+L'],

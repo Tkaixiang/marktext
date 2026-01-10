@@ -1,4 +1,4 @@
-import { Menu, MenuItem } from 'electron'
+import { Menu, MenuItem, BrowserWindow, ContextMenuParams, Event } from 'electron'
 import {
   getCUT,
   getCOPY,
@@ -27,13 +27,14 @@ const getContextItems = () => [
   getPASTE_AS_PLAIN_TEXT()
 ]
 
-const isInsideEditor = (params) => {
+const isInsideEditor = (params: ContextMenuParams) => {
+  // @ts-ignore: inputFieldType property is missing in Electron types but used in codebase
   const { isEditable, editFlags, inputFieldType } = params
   // WORKAROUND for Electron#32102: `params.spellcheckEnabled` is always false. Try to detect the editor container via other information.
   return isEditable && !inputFieldType && !!editFlags.canEditRichly
 }
 
-export const showEditorContextMenu = (win, event, params, isSpellcheckerEnabled) => {
+export const showEditorContextMenu = (win: BrowserWindow, event: Event, params: ContextMenuParams, isSpellcheckerEnabled: boolean) => {
   const {
     isEditable,
     hasImageContents,
@@ -72,11 +73,12 @@ export const showEditorContextMenu = (win, event, params, isSpellcheckerEnabled)
     const contextItems = getContextItems()
     const copyItems = [contextItems[3], contextItems[4], contextItems[8], contextItems[7]] // CUT, COPY, COPY_AS_HTML, COPY_AS_MARKDOWN
     copyItems.forEach((item) => {
-      item.enabled = canCopy
+      if (item) item.enabled = canCopy
     })
     contextItems.forEach((item) => {
-      menu.append(new MenuItem(item))
+      if (item) menu.append(new MenuItem(item))
     })
+    // @ts-ignore: Event type mismatch in Electron types vs actual usage
     menu.popup([{ window: win, x: event.clientX, y: event.clientY }])
   }
 }

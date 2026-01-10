@@ -1,12 +1,17 @@
-import { shell, ipcMain } from 'electron'
+import { shell, ipcMain, IpcMainInvokeEvent, IpcMainEvent } from 'electron'
 import log from 'electron-log'
 import EventEmitter from 'events'
 import fsPromises from 'fs/promises'
-import { getCurrentKeyboardLayout, getKeyMap, onDidChangeKeyboardLayout } from 'native-keymap'
+import { getCurrentKeyboardLayout, getKeyMap, onDidChangeKeyboardLayout, IKeyboardMapping, IKeyboardLayoutInfo } from 'native-keymap'
 import os from 'os'
 import path from 'path'
 
-let currentKeyboardInfo = null
+export interface NativeKeyMapInfo {
+  layout: IKeyboardLayoutInfo
+  keymap: IKeyboardMapping
+}
+
+let currentKeyboardInfo: NativeKeyMapInfo | null = null
 const loadKeyboardInfo = () => {
   currentKeyboardInfo = {
     layout: getCurrentKeyboardLayout(),
@@ -24,19 +29,26 @@ export const getKeyboardInfo = () => {
 
 const KEYBOARD_LAYOUT_MONITOR_CHANNEL_ID = 'onDidChangeKeyboardLayout'
 class KeyboardLayoutMonitor extends EventEmitter {
+  private _isSubscribed: boolean
+  private _emitTimer: NodeJS.Timeout | null
+
   constructor() {
     super()
     this._isSubscribed = false
     this._emitTimer = null
   }
 
-  addListener(callback) {
+  // @ts-ignore: Override matches runtime usage but conflicts with strictly typed EventEmitter
+  addListener(callback: (info: NativeKeyMapInfo) => void): this {
     this._ensureNativeListener()
-    this.on(KEYBOARD_LAYOUT_MONITOR_CHANNEL_ID, callback)
+    super.addListener(KEYBOARD_LAYOUT_MONITOR_CHANNEL_ID, callback)
+    return this
   }
 
-  removeListener(callback) {
-    this.removeListener(KEYBOARD_LAYOUT_MONITOR_CHANNEL_ID, callback)
+  // @ts-ignore: Override matches runtime usage but conflicts with strictly typed EventEmitter
+  removeListener(callback: (...args: any[]) => void): this {
+    super.removeListener(KEYBOARD_LAYOUT_MONITOR_CHANNEL_ID, callback)
+    return this
   }
 
   _ensureNativeListener() {
@@ -44,7 +56,9 @@ class KeyboardLayoutMonitor extends EventEmitter {
       this._isSubscribed = true
       onDidChangeKeyboardLayout(() => {
         // The keyboard layout change event may be emitted multiple times.
-        clearTimeout(this._emitTimer)
+        if (this._emitTimer) {
+          clearTimeout(this._emitTimer)
+        }
         this._emitTimer = setTimeout(() => {
           this.emit(KEYBOARD_LAYOUT_MONITOR_CHANNEL_ID, loadKeyboardInfo())
           this._emitTimer = null

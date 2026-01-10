@@ -1153,3 +1153,9 @@ The migration is complete when:
 - [x] exceptionHandler.js -> exceptionHandler.ts
 - [x] globalSetting.js -> globalSetting.ts
 - [x] i18n.js -> i18n.ts
+- [x] cli/*.ts
+- [x] commands/*.ts
+- [x] preferences/*.ts
+- [x] spellchecker/*.ts
+- [x] contextMenu/*.ts
+- [x] keyboard/*.ts

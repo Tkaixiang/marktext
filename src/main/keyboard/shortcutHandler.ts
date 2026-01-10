@@ -1,8 +1,9 @@
-import { shell } from 'electron'
+import { shell, BrowserWindow } from 'electron'
 import fs from 'fs'
 import fsPromises from 'fs/promises'
 import path from 'path'
 import log from 'electron-log'
+// @ts-ignore
 import { electronLocalshortcut, isValidElectronAccelerator } from '@hfelix/electron-localshortcut'
 import { isFile2 } from 'common/filesystem'
 import { isEqualAccelerator } from 'common/keybinding'
@@ -13,11 +14,16 @@ import keybindingsLinux from './keybindingsLinux'
 import keybindingsWindows from './keybindingsWindows'
 
 class Keybindings {
+  configPath: string
+  commandManager: any
+  userKeybindings: Map<string, string>
+  keys: Map<string, string>
+
   /**
    * @param {CommandManager} commandManager The command manager instance.
    * @param {AppEnvironment} appEnvironment The application environment instance.
    */
-  constructor (commandManager, appEnvironment) {
+  constructor (commandManager: any, appEnvironment: any) {
     const { userDataPath } = appEnvironment.paths
     this.configPath = path.join(userDataPath, 'keybindings.json')
     this.commandManager = commandManager
@@ -38,7 +44,7 @@ class Keybindings {
     this._loadLocalKeybindings()
   }
 
-  getAccelerator (id) {
+  getAccelerator (id: string) {
     const name = this.keys.get(id)
     if (!name) {
       return null
@@ -46,7 +52,7 @@ class Keybindings {
     return name
   }
 
-  registerAccelerator (win, accelerator, callback) {
+  registerAccelerator (win: BrowserWindow, accelerator: string, callback: (win: BrowserWindow) => void) {
     if (!win || !accelerator || !callback) {
       throw new Error(`addKeyHandler: invalid arguments (accelerator="${accelerator}").`)
     }
@@ -61,11 +67,11 @@ class Keybindings {
     })
   }
 
-  unregisterAccelerator (win, accelerator) {
+  unregisterAccelerator (win: BrowserWindow, accelerator: string) {
     electronLocalshortcut.unregister(win, accelerator)
   }
 
-  registerEditorKeyHandlers (win) {
+  registerEditorKeyHandlers (win: BrowserWindow) {
     for (const [id, accelerator] of this.keys) {
       if (accelerator && accelerator.length > 1) {
         this.registerAccelerator(win, accelerator, () => {
@@ -108,7 +114,7 @@ class Keybindings {
    * @param {Map<String, String>} userKeybindings New user key bindings.
    * @returns {Promise<Boolean>}
    */
-  async setUserKeybindings (userKeybindings) {
+  async setUserKeybindings (userKeybindings: Map<string, string>) {
     this.userKeybindings = new Map(userKeybindings)
     return this._saveUserKeybindings()
   }
@@ -122,6 +128,7 @@ class Keybindings {
 
     // Notify key mapper when the keyboard layout was changed.
     keyboardLayoutMonitor.addListener(({ layout, keymap }) => {
+      // @ts-ignore: global property
       if (global.MARKTEXT_DEBUG && process.env.MARKTEXT_DEBUG_KEYBOARD) {
         console.log('[DEBUG] Keyboard layout changed:\n', layout)
       }
@@ -141,6 +148,7 @@ class Keybindings {
   }
 
   _loadLocalKeybindings () {
+    // @ts-ignore: global property
     if (global.MARKTEXT_SAFE_MODE || !isFile2(this.configPath)) {
       return
     }
@@ -157,7 +165,7 @@ class Keybindings {
     //   "file.save-as": "CmdOrCtrl+Shift+S"
     // }
 
-    const userAccelerators = new Map()
+    const userAccelerators = new Map<string, string>()
     for (const key in rawUserKeybindings) {
       if (this.keys.has(key)) {
         const value = rawUserKeybindings[key]

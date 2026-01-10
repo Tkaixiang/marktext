@@ -1,4 +1,4 @@
-import { MenuItem, ipcMain } from 'electron'
+import { MenuItem, ipcMain, BrowserWindow, MenuItemConstructorOptions } from 'electron'
 import log from 'electron-log'
 import { isOsx } from '../../config'
 import { addToDictionary } from '../../spellchecker'
@@ -9,22 +9,24 @@ import { t } from '../../i18n'
  * Build the spell checker menu depending on input.
  *
  * @param {boolean} isMisspelled Whether a the selected word is misspelled.
- * @param {[string]} misspelledWord The selected word.
- * @param {[string[]]} wordSuggestions Suggestions for `selectedWord`.
- * @returns {MenuItem[]}
+ * @param {string} misspelledWord The selected word.
+ * @param {string[]} wordSuggestions Suggestions for `selectedWord`.
+ * @returns {MenuItemConstructorOptions[]}
  */
-export default (isMisspelled, misspelledWord, wordSuggestions) => {
-  const spellingSubmenu = []
+export default (isMisspelled: boolean, misspelledWord: string, wordSuggestions: string[]) => {
+  const spellingSubmenu: MenuItemConstructorOptions[] = []
 
   spellingSubmenu.push(
-    new MenuItem({
+    {
       label: t('contextMenu.changeLanguage'),
       // NB: On macOS the OS spell checker is used and will detect the language automatically.
       visible: !isOsx,
       click(menuItem, targetWindow) {
-        targetWindow.webContents.send('mt::spelling-show-switch-language')
+        if (targetWindow && targetWindow instanceof BrowserWindow) {
+          targetWindow.webContents.send('mt::spelling-show-switch-language')
+        }
       }
-    })
+    }
   )
 
   // Handle misspelled word if wordSuggestions is set, otherwise word is correct.
@@ -32,12 +34,14 @@ export default (isMisspelled, misspelledWord, wordSuggestions) => {
     spellingSubmenu.push({
       label: t('contextMenu.addToDictionary'),
       click(menuItem, targetWindow) {
-        if (!addToDictionary(targetWindow, misspelledWord)) {
-          log.error(`Error while adding "${misspelledWord}" to dictionary.`)
-          return
+        if (targetWindow && targetWindow instanceof BrowserWindow) {
+          if (!addToDictionary(targetWindow, misspelledWord)) {
+            log.error(`Error while adding "${misspelledWord}" to dictionary.`)
+            return
+          }
+          // Need to notify Chromium to invalidate the spelling underline.
+          targetWindow.webContents.replaceMisspelling(misspelledWord)
         }
-        // Need to notify Chromium to invalidate the spelling underline.
-        targetWindow.webContents.replaceMisspelling(misspelledWord)
       }
     })
 
@@ -47,10 +51,12 @@ export default (isMisspelled, misspelledWord, wordSuggestions) => {
         spellingSubmenu.push({
           label: word,
           click(menuItem, targetWindow) {
-            targetWindow.webContents.send('mt::spelling-replace-misspelling', {
-              word: misspelledWord,
-              replacement: word
-            })
+            if (targetWindow && targetWindow instanceof BrowserWindow) {
+              targetWindow.webContents.send('mt::spelling-replace-misspelling', {
+                word: misspelledWord,
+                replacement: word
+              })
+            }
           }
         })
       }

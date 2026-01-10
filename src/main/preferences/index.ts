@@ -7,18 +7,39 @@ import log from 'electron-log'
 import { isWindows } from '../config'
 import { hasSameKeys } from '../utils'
 import { getSupportedLanguages, isLanguageSupported } from '../../common/i18n'
-import schema from './schema'
+// @ts-ignore
+import schema from './schema.json'
 
 const PREFERENCES_FILE_NAME = 'preferences'
 
+// Define a manual interface for the store since the types aren't resolving correctly
+// likely due to ESM/CommonJS conflicts with electron-store/conf
+interface IPreferenceStore {
+  set(key: string, value: any): void;
+  set(object: Record<string, any>): void;
+  get(key: string, defaultValue?: any): any;
+  delete(key: string): void;
+  store: Record<string, any>;
+  size: number;
+}
+
+interface AppPaths {
+  preferencesPath: string
+}
+
 class Preference extends EventEmitter {
+  public preferencesPath: string
+  public hasPreferencesFile: boolean
+  public store: IPreferenceStore
+  public staticPath: string
+
   /**
-   * @param {AppPaths} userDataPath The path instance.
+   * @param {AppPaths} paths The path instance.
    *
    * NOTE: This throws an exception when validation fails.
    *
    */
-  constructor(paths) {
+  constructor(paths: AppPaths) {
     // TODO: Preferences should not loaded if global.MARKTEXT_SAFE_MODE is set.
     super()
 
@@ -27,27 +48,29 @@ class Preference extends EventEmitter {
     this.hasPreferencesFile = fs.existsSync(
       path.join(this.preferencesPath, `./${PREFERENCES_FILE_NAME}.json`)
     )
+
+    // Cast to unknown first then to our interface to bypass type checking issues
     this.store = new Store({
       schema,
       name: PREFERENCES_FILE_NAME
-    })
+    }) as unknown as IPreferenceStore
 
     this.staticPath = path.join(global.__static, 'preference.json')
     this.init()
   }
 
   init = () => {
-    let defaultSettings = null
+    let defaultSettings: Record<string, any> | null = null
     try {
       defaultSettings = JSON.parse(fs.readFileSync(this.staticPath, { encoding: 'utf8' }) || '{}')
 
       // Set best theme on first application start.
-      if (nativeTheme.shouldUseDarkColors) {
+      if (nativeTheme.shouldUseDarkColors && defaultSettings) {
         defaultSettings.theme = 'dark'
       }
 
       // Set system language on first application start
-      if (!this.hasPreferencesFile) {
+      if (!this.hasPreferencesFile && defaultSettings) {
         const systemLanguage = this._getSystemLanguage()
         if (systemLanguage) {
           defaultSettings.language = systemLanguage
@@ -107,12 +130,12 @@ class Preference extends EventEmitter {
     return this.store.store
   }
 
-  setItem(key, value) {
+  setItem(key: string, value: any) {
     ipcMain.emit('broadcast-preferences-changed', { [key]: value })
     return this.store.set(key, value)
   }
 
-  getItem(key) {
+  getItem(key: string) {
     return this.store.get(key)
   }
 
@@ -121,7 +144,7 @@ class Preference extends EventEmitter {
    *
    * @param {Object.<string, *>} settings A settings object or subset object with key/value entries.
    */
-  setItems(settings) {
+  setItems(settings: Record<string, any>) {
     if (!settings) {
       log.error('Cannot change settings without entires: object is undefined or null.')
       return
@@ -133,7 +156,7 @@ class Preference extends EventEmitter {
   }
 
   getPreferredEol() {
-    const endOfLine = this.getItem('endOfLine')
+    const endOfLine = this.getItem('endOfLine') as string || ''
     if (endOfLine === 'lf') {
       return 'lf'
     }
@@ -151,7 +174,9 @@ class Preference extends EventEmitter {
   _listenForIpcMain() {
     ipcMain.on('mt::ask-for-user-preference', (e) => {
       const win = BrowserWindow.fromWebContents(e.sender)
-      win.webContents.send('mt::user-preference', this.getAll())
+      if (win && win.webContents) {
+        win.webContents.send('mt::user-preference', this.getAll())
+      }
     })
     ipcMain.on('mt::set-user-preference', (e, settings) => {
       this.setItems(settings)
@@ -186,6 +211,9 @@ class Preference extends EventEmitter {
 
       // 尝试匹配语言的主要部分（如 zh）
       const primaryLanguage = systemLocale.split('-')[0]
+      if (!primaryLanguage) {
+         return null
+      }
       const matchedLanguage = supportedLanguages.find((lang) => lang.startsWith(primaryLanguage))
 
       if (matchedLanguage) {
