@@ -3,27 +3,49 @@ import { getUniqueId } from '../../util'
 import { sanitize, EXPORT_DOMPURIFY_CONFIG } from '../../util/dompurify'
 import './index.css'
 
-const INON_HASH = {
+type NotificationType = 'primary' | 'error' | 'warning' | 'info'
+
+const ICON_HASH: Record<NotificationType, string> = {
   primary: 'icon-message',
   error: 'icon-error',
   warning: 'icon-warn',
   info: 'icon-info'
 }
-const TYPE_HASH = {
+
+const TYPE_HASH: Record<NotificationType, string> = {
   primary: 'mt-primary',
   error: 'mt-error',
   warning: 'mt-warn',
   info: 'mt-info'
 }
 
-const fillTemplate = (type, title, message) => {
+const fillTemplate = (type: NotificationType, title: string, message: string): string => {
   return template
-    .replace(/\{\{icon\}\}/, INON_HASH[type])
+    .replace(/\{\{icon\}\}/, ICON_HASH[type])
     .replace(/\{\{title\}\}/, sanitize(title, EXPORT_DOMPURIFY_CONFIG))
     .replace(/\{\{message\}\}/, sanitize(message, EXPORT_DOMPURIFY_CONFIG))
 }
 
-const notification = {
+export interface NotifyOptions {
+  time?: number
+  title?: string
+  message?: string
+  type?: NotificationType
+  showConfirm?: boolean
+}
+
+interface NoticeEntry {
+  remove: () => void
+}
+
+interface NotificationService {
+  name: string
+  noticeCache: Record<string, NoticeEntry>
+  clear: () => void
+  notify: (options: NotifyOptions) => Promise<void>
+}
+
+const notification: NotificationService = {
   name: 'notify',
   noticeCache: {},
   clear() {
@@ -35,28 +57,28 @@ const notification = {
     time = 10000,
     title = '',
     message = '',
-    type = 'primary', // primary, error, warning or info
+    type = 'primary',
     showConfirm = false
-  }) {
-    let rs
-    let rj
-    let timer = null
+  }: NotifyOptions): Promise<void> {
+    let rs: (() => void) | undefined
+    let rj: (() => void) | undefined
+    let timer: ReturnType<typeof setTimeout> | null = null
     const id = getUniqueId()
 
     const fragment = document.createElement('div')
     fragment.innerHTML = fillTemplate(type, title, message)
 
-    const noticeContainer = fragment.querySelector('.mt-notification')
-    const bgNotice = noticeContainer.querySelector('.notice-bg')
-    const contentContainer = noticeContainer.querySelector('.content')
-    const fluent = noticeContainer.querySelector('.fluent')
-    const close = noticeContainer.querySelector('.close')
+    const noticeContainer = fragment.querySelector('.mt-notification') as HTMLElement
+    const bgNotice = noticeContainer.querySelector('.notice-bg') as HTMLElement
+    const contentContainer = noticeContainer.querySelector('.content') as HTMLElement
+    const fluent = noticeContainer.querySelector('.fluent') as HTMLElement
+    const close = noticeContainer.querySelector('.close') as HTMLElement
     const { offsetHeight } = noticeContainer
-    let target = noticeContainer
+    let target: HTMLElement = noticeContainer
 
     if (showConfirm) {
       noticeContainer.classList.add('mt-confirm')
-      target = noticeContainer.querySelector('.confirm')
+      target = noticeContainer.querySelector('.confirm') as HTMLElement
     }
 
     noticeContainer.classList.add(TYPE_HASH[type])
@@ -66,7 +88,7 @@ const notification = {
     fluent.style.height = offsetHeight * 2 + 'px'
     fluent.style.width = offsetHeight * 2 + 'px'
 
-    const setCloseTimer = () => {
+    const setCloseTimer = (): void => {
       if (typeof time === 'number' && time > 0) {
         timer = setTimeout(() => {
           remove()
@@ -74,7 +96,7 @@ const notification = {
       }
     }
 
-    const mousemoveHandler = (event) => {
+    const mousemoveHandler = (event: MouseEvent): void => {
       const { left, top } = noticeContainer.getBoundingClientRect()
       const x = event.pageX
       const y = event.pageY
@@ -87,7 +109,7 @@ const notification = {
       if (timer) clearTimeout(timer)
     }
 
-    const mouseleaveHandler = (event) => {
+    const mouseleaveHandler = (_event: MouseEvent): void => {
       fluent.style.opacity = '0'
       fluent.style.height = noticeContainer.offsetHeight * 4 + 'px'
       fluent.style.width = noticeContainer.offsetHeight * 4 + 'px'
@@ -96,33 +118,33 @@ const notification = {
       setCloseTimer()
     }
 
-    const clickHandler = (event) => {
+    const clickHandler = (event: MouseEvent): void => {
       event.preventDefault()
       event.stopPropagation()
       remove()
       rs && rs()
     }
 
-    const closeHandler = (event) => {
+    const closeHandler = (event: MouseEvent): void => {
       event.preventDefault()
       event.stopPropagation()
       remove()
       rj && rj()
     }
 
-    const rePositionNotices = () => {
-      const notices = document.querySelectorAll('.mt-notification')
+    const rePositionNotices = (): void => {
+      const notices = document.querySelectorAll('.mt-notification') as NodeListOf<HTMLElement>
       let i
       let hx = 0
       const len = notices.length
       for (i = 0; i < len; i++) {
         notices[i].style.transform = `translate(0, -${hx}px)`
-        notices[i].style.zIndex = 10000 - i
+        notices[i].style.zIndex = String(10000 - i)
         hx += notices[i].offsetHeight + 10
       }
     }
 
-    const remove = () => {
+    const remove = (): void => {
       fluent.style.filter = 'blur(10px)'
       fluent.style.opacity = '0'
       fluent.style.height = noticeContainer.offsetHeight * 5 + 'px'
@@ -159,7 +181,7 @@ const notification = {
 
     setCloseTimer()
 
-    document.body.prepend(noticeContainer, document.body.firstChild)
+    document.body.prepend(noticeContainer)
 
     return new Promise((resolve, reject) => {
       rs = resolve

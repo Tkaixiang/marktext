@@ -6,8 +6,30 @@ import { t } from '../i18n'
 const crlfDescription = 'Carriage return and line feed (CRLF)'
 const lfDescription = 'Line feed (LF)'
 
+export interface Subcommand {
+  id: string
+  description: string
+  value?: string | number
+}
+
+export interface EditorState {
+  currentFile: {
+    lineEnding: string
+    encoding: { encoding: string; isBom?: boolean }
+    trimTrailingNewline?: number
+  } | null
+  tabs: Array<{ pathname: string | null }>
+}
+
 class LineEndingCommand {
-  constructor(editorState) {
+  id: string
+  description: string
+  placeholder: string
+  subcommands: Subcommand[]
+  subcommandSelectedIndex: number
+  private _editorState: EditorState
+
+  constructor(editorState: EditorState) {
     this.id = 'file.line-ending'
     this.description = getCommandDescriptionById('file.line-ending')
     this.placeholder = t('commandPalette.placeholders.selectOption')
@@ -30,8 +52,8 @@ class LineEndingCommand {
     this._editorState = editorState
   }
 
-  run = async () => {
-    const { lineEnding } = this._editorState.currentFile
+  run = async (): Promise<void> => {
+    const lineEnding = this._editorState.currentFile?.lineEnding
     if (lineEnding === 'crlf') {
       this.subcommandSelectedIndex = 0
       this.subcommands[0].description = `${crlfDescription} - current`
@@ -43,17 +65,17 @@ class LineEndingCommand {
     }
   }
 
-  execute = async () => {
+  execute = async (): Promise<void> => {
     // Timeout to hide the command palette and then show again to prevent issues.
     await delay(100)
     bus.emit('show-command-palette', this)
   }
 
-  executeSubcommand = async (_, value) => {
+  executeSubcommand = async (_id: string, value: string): Promise<void> => {
     bus.emit('mt::set-line-ending', value)
   }
 
-  unload = () => {}
+  unload = (): void => {}
 }
 
 export default LineEndingCommand

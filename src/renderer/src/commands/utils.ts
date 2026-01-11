@@ -1,5 +1,5 @@
 /// Check whether the package is updatable at runtime.
-export const isUpdatable = () => {
+export const isUpdatable = (): boolean => {
   // TODO: t('commands.utils.todoUpdateCheck')
 
   const resFile = window.fileUtils.isFile(window.path.join(process.resourcesPath, 'app-update.yml'))

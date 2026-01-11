@@ -7,22 +7,22 @@ import ulyssesTheme from '../assets/themes/ulysses.theme.css?inline'
 import darkPrismTheme from '../assets/themes/prismjs/dark.theme.css?inline'
 import oneDarkPrismTheme from '../assets/themes/prismjs/one-dark.theme.css?inline'
 
-export const dark = () => {
+export const dark = (): string => {
   return darkTheme + '\n' + darkPrismTheme
 }
 
-export const graphite = () => {
+export const graphite = (): string => {
   return graphiteTheme
 }
 
-export const materialDark = () => {
+export const materialDark = (): string => {
   return materialDarkTheme + '\n' + darkPrismTheme
 }
 
-export const oneDark = () => {
+export const oneDark = (): string => {
   return oneDarkTheme + '\n' + oneDarkPrismTheme
 }
 
-export const ulysses = () => {
+export const ulysses = (): string => {
   return ulyssesTheme
 }

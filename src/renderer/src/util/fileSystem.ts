@@ -7,38 +7,49 @@ import dayjs from 'dayjs'
 import { Octokit } from '@octokit/rest'
 import { isWindows } from './index'
 
-export const create = async (pathname, type) => {
+export const create = async (pathname: string, type: 'directory' | 'file'): Promise<void> => {
   return type === 'directory'
     ? window.fileUtils.ensureDir(pathname)
     : window.fileUtils.outputFile(pathname, '')
 }
 
-export const paste = async ({ src, dest, type }) => {
+export interface PasteOptions {
+  src: string
+  dest: string
+  type: 'cut' | 'copy'
+}
+
+export const paste = async ({ src, dest, type }: PasteOptions): Promise<void> => {
   return type === 'cut' ? window.fileUtils.move(src, dest) : window.fileUtils.copy(src, dest)
 }
 
-export const rename = async (src, dest) => {
+export const rename = async (src: string, dest: string): Promise<void> => {
   return window.fileUtils.move(src, dest)
 }
 
-export const getHash = (content, encoding, type) => {
+export const getHash = (content: string, encoding: crypto.Encoding, type: string): string => {
   return crypto.createHash(type).update(content, encoding).digest('hex')
 }
 
-export const getContentHash = (content) => {
+export const getContentHash = (content: string): string => {
   return getHash(content, 'utf8', 'sha1')
 }
 
 /**
  * Moves an image to a relative position.
  *
- * @param {String} cwd The relative base path (project root or full folder path of opened file).
- * @param {String} relativeName The relative directory name.
- * @param {String} filePath The full path to the opened file in editor.
- * @param {String} imagePath The image to move.
- * @returns {String} The relative path the image from given `filePath`.
+ * @param cwd The relative base path (project root or full folder path of opened file).
+ * @param relativeName The relative directory name.
+ * @param filePath The full path to the opened file in editor.
+ * @param imagePath The image to move.
+ * @returns The relative path the image from given `filePath`.
  */
-export const moveToRelativeFolder = async (cwd, relativeName, filePath, imagePath) => {
+export const moveToRelativeFolder = async (
+  cwd: string,
+  relativeName: string,
+  filePath: string,
+  imagePath: string
+): Promise<string> => {
   if (!relativeName) {
     relativeName = 'assets'
   } else if (window.path.isAbsolute(relativeName)) {
@@ -57,7 +68,11 @@ export const moveToRelativeFolder = async (cwd, relativeName, filePath, imagePat
   return dstRelPath
 }
 
-export const moveImageToFolder = async (pathname, image, outputDir) => {
+export const moveImageToFolder = async (
+  pathname: string,
+  image: string | File,
+  outputDir: string
+): Promise<string> => {
   await window.fileUtils.ensureDir(outputDir)
   const isPath = typeof image === 'string'
   if (isPath) {
@@ -90,38 +105,63 @@ export const moveImageToFolder = async (pathname, image, outputDir) => {
   }
 }
 
+export interface ImageBedPreferences {
+  currentUploader: 'none' | 'github' | 'picgo' | 'cliScript'
+  imageBed: {
+    github: {
+      owner: string
+      repo: string
+      branch?: string
+    }
+  }
+  githubToken: string
+  cliScript: string
+}
+
 /**
  * @jocs todo, rewrite it use class
  */
-export const uploadImage = async (pathname, image, preferences) => {
+export const uploadImage = async (
+  pathname: string,
+  image: string | File,
+  preferences: ImageBedPreferences
+): Promise<string> => {
   const { currentUploader, imageBed, githubToken: auth, cliScript } = preferences
   const { owner, repo, branch } = imageBed.github
   const isPath = typeof image === 'string'
   const MAX_SIZE = 5 * 1024 * 1024
-  let resolvePromise, rejectPromise
-  const promise = new Promise((res, rej) => {
+  let resolvePromise: (value: string) => void
+  let rejectPromise: (reason?: string | Error) => void
+  const promise = new Promise<string>((res, rej) => {
     resolvePromise = res
     rejectPromise = rej
   })
 
   if (currentUploader === 'none') {
-    rejectPromise('No image uploader provided.')
+    rejectPromise!('No image uploader provided.')
   }
 
-  const uploadByGithub = (content, filename) => {
+  const uploadByGithub = (content: string, filename: string): void => {
     const octokit = new Octokit({ auth })
     const filePath = `${dayjs().format('YYYY/MM')}/${dayjs().format('DD-HH-mm-ss')}-${filename}`
     const message = `Upload by MarkText at ${dayjs().format('YYYY-MM-DD HH:mm:ss')}`
-    const payload = { owner, repo, path: filePath, branch, message, content }
+    const payload: {
+      owner: string
+      repo: string
+      path: string
+      branch?: string
+      message: string
+      content: string
+    } = { owner, repo, path: filePath, branch, message, content }
     if (!branch) delete payload.branch
     octokit.repos
       .createOrUpdateFileContents(payload)
-      .then((result) => resolvePromise(result.data.content.download_url))
-      .catch(() => rejectPromise('Upload failed, the image will be copied to the image folder'))
+      .then((result) => resolvePromise!(result.data.content?.download_url ?? ''))
+      .catch(() => rejectPromise!('Upload failed, the image will be copied to the image folder'))
   }
 
   // Build a robust PATH for spawned processes (Electron packaged apps often miss Homebrew paths)
-  const getPreferredPathEnv = () => {
+  const getPreferredPathEnv = (): string => {
     const extras =
       process.platform === 'darwin'
         ? ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', '/bin']
@@ -134,7 +174,7 @@ export const uploadImage = async (pathname, image, preferences) => {
     return merged.filter(Boolean).join(':')
   }
 
-  const resolvePicgoBinary = () => {
+  const resolvePicgoBinary = (): string | null => {
     const candidates =
       process.platform === 'win32'
         ? ['picgo', 'picgo.exe']
@@ -156,12 +196,14 @@ export const uploadImage = async (pathname, image, preferences) => {
           window.fileUtils.pathExistsSync(c)
         )
           return c
-      } catch {}
+      } catch {
+        // Ignore errors
+      }
     }
     return null
   }
 
-  const parsePicgoOutput = (text) => {
+  const parsePicgoOutput = (text: string): string | null => {
     const raw = String(text || '')
     const cleaned = raw.replace(/\u001b\[[0-9;]*m/g, '') // strip ANSI colors
     try {
@@ -175,7 +217,7 @@ export const uploadImage = async (pathname, image, preferences) => {
           (line.startsWith('[') && line.endsWith(']'))
         ) {
           try {
-            const obj = JSON.parse(line)
+            const obj = JSON.parse(line) as Record<string, unknown>
             if (obj) {
               // 仅在明确成功时返回 URL
               if (obj.success === true && typeof obj.imgUrl === 'string') return obj.imgUrl
@@ -183,7 +225,9 @@ export const uploadImage = async (pathname, image, preferences) => {
                 return String(obj.result[obj.result.length - 1])
               if (obj.success === true && typeof obj.url === 'string') return obj.url
             }
-          } catch {}
+          } catch {
+            // Ignore JSON parse errors
+          }
         }
         // 仅在包含 success 关键词时接受 URL
         const kv = line.match(/(?:success|succeeded|uploaded)\s*:?\s*(https?:\/\/\S+)/i)
@@ -191,7 +235,9 @@ export const uploadImage = async (pathname, image, preferences) => {
       }
       // last non-empty line may be the URL itself
       // 不再使用最后一行 URL 兜底，避免误判成功
-    } catch {}
+    } catch {
+      // Ignore errors
+    }
     const marker = cleaned.split('[PicGo SUCCESS]:')
     if (marker.length >= 2) {
       const candidate = marker[marker.length - 1].trim()
@@ -201,28 +247,40 @@ export const uploadImage = async (pathname, image, preferences) => {
     return null
   }
 
-  const uploadByCommand = async (uploader, filepath, suffix = '') => {
+  const uploadByCommand = async (
+    uploader: 'picgo' | 'cliScript',
+    filepath: string | ArrayBuffer,
+    suffix = ''
+  ): Promise<void> => {
     let localIsPath = true
-    let localPath = filepath
+    let localPath = filepath as string
     if (typeof filepath !== 'string') {
       localIsPath = false
       const data = new Uint8Array(filepath)
       localPath = window.path.join(tmpdir(), `${Date.now()}${suffix}`)
       await window.fileUtils.writeFile(localPath, data)
     }
-    const handleExec = (err, data, stderr) => {
+    const handleExec = (
+      err: Error | null,
+      data: string | Buffer,
+      stderr?: string | Buffer
+    ): void => {
       try {
-        if (!localIsPath) window.fileUtils?.unlink && window.fileUtils.unlink(localPath)
-      } catch {}
-      if (err) return rejectPromise(err)
+        if (!localIsPath && (window.fileUtils as any)?.unlink) {
+          ;(window.fileUtils as any).unlink(localPath)
+        }
+      } catch {
+        // Ignore cleanup errors
+      }
+      if (err) return rejectPromise!(err)
       const text = String(data || '') + (stderr ? `\n${String(stderr)}` : '')
       const url = parsePicgoOutput(text)
-      if (url) resolvePromise(url)
-      else rejectPromise(`PicGo upload error: cannot parse output\n${text.slice(0, 400)}`)
+      if (url) resolvePromise!(url)
+      else rejectPromise!(`PicGo upload error: cannot parse output\n${text.slice(0, 400)}`)
     }
     if (uploader === 'picgo') {
       const cmd = resolvePicgoBinary()
-      if (!cmd) return rejectPromise('PicGo command not found in PATH')
+      if (!cmd) return rejectPromise!('PicGo command not found in PATH')
       exec(
         `${cmd} u "${localPath}"`,
         { env: { ...process.env, PATH: getPreferredPathEnv() } },
@@ -235,17 +293,21 @@ export const uploadImage = async (pathname, image, preferences) => {
         { env: { ...process.env, PATH: getPreferredPathEnv() } },
         (err, data) => {
           try {
-            if (!localIsPath) window.fileUtils?.unlink && window.fileUtils.unlink(localPath)
-          } catch {}
-          if (err) return rejectPromise(err)
-          resolvePromise(String(data || '').trim())
+            if (!localIsPath && (window.fileUtils as any)?.unlink) {
+              ;(window.fileUtils as any).unlink(localPath)
+            }
+          } catch {
+            // Ignore cleanup errors
+          }
+          if (err) return rejectPromise!(err)
+          resolvePromise!(String(data || '').trim())
         }
       )
     }
   }
 
-  const notification = () => {
-    rejectPromise('Cannot upload more than 5M image, the image will be copied to the image folder')
+  const notification = (): void => {
+    rejectPromise!('Cannot upload more than 5M image, the image will be copied to the image folder')
   }
 
   if (isPath) {
@@ -270,21 +332,21 @@ export const uploadImage = async (pathname, image, preferences) => {
         }
       }
     } else {
-      resolvePromise(image)
+      resolvePromise!(image)
     }
   } else {
     const { size } = image
     if (size > MAX_SIZE) notification()
     else {
       const reader = new FileReader()
-      reader.onload = () => {
+      reader.onload = (): void => {
         switch (currentUploader) {
           case 'picgo':
           case 'cliScript':
-            uploadByCommand(currentUploader, reader.result, window.path.extname(image.name))
+            uploadByCommand(currentUploader, reader.result as ArrayBuffer, window.path.extname(image.name))
             break
           default:
-            uploadByGithub(Buffer.from(reader.result).toString('base64'), image.name)
+            uploadByGithub(Buffer.from(reader.result as ArrayBuffer).toString('base64'), image.name)
         }
       }
       reader.readAsArrayBuffer(image)
@@ -293,7 +355,7 @@ export const uploadImage = async (pathname, image, preferences) => {
   return promise
 }
 
-export const isFileExecutableSync = (filepath) => {
+export const isFileExecutableSync = (filepath: string): boolean => {
   try {
     const stat = statSync(filepath)
     if (process.platform === 'win32') {

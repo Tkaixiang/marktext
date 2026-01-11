@@ -6,7 +6,22 @@ import liberTheme from '@/assets/themes/export/liber.theme.css?inline'
 import { cloneObj } from '../util'
 import { sanitize, EXPORT_DOMPURIFY_CONFIG } from '../util/dompurify'
 
-export const getCssForOptions = (options) => {
+export interface PdfExportOptions {
+  type: 'pdf' | 'styledHtml' | string
+  pageMarginTop: number
+  pageMarginRight: number
+  pageMarginBottom: number
+  pageMarginLeft: number
+  fontFamily?: string
+  fontSize?: number
+  lineHeight?: number
+  autoNumberingHeadings?: boolean
+  showFrontMatter?: boolean
+  theme?: string
+  headerFooterFontSize?: number
+}
+
+export const getCssForOptions = (options: PdfExportOptions): string => {
   const {
     type,
     pageMarginTop,
@@ -60,7 +75,7 @@ export const getCssForOptions = (options) => {
       output += liberTheme
     } else {
       // Read theme from disk
-      const { userDataPath } = global.marktext.paths
+      const { userDataPath } = (global as any).marktext.paths
       const themePath = window.path.join(userDataPath, 'themes/export', theme)
       if (window.fileUtils.isFile(themePath)) {
         try {
@@ -88,7 +103,22 @@ export const getCssForOptions = (options) => {
   return unescapeHTML(sanitize(escapeHTML(output), EXPORT_DOMPURIFY_CONFIG))
 }
 
-const generateHtmlToc = (tocList, slugger, currentLevel, options) => {
+export interface TocItem {
+  lvl: number
+  content: string
+}
+
+export interface TocOptions {
+  tocIncludeTopHeading?: boolean
+  tocTitle?: string
+}
+
+const generateHtmlToc = (
+  tocList: TocItem[],
+  slugger: ReturnType<typeof Slugger>,
+  currentLevel: number,
+  options: TocOptions
+): string => {
   if (!tocList || tocList.length === 0) {
     return ''
   }
@@ -101,7 +131,8 @@ const generateHtmlToc = (tocList, slugger, currentLevel, options) => {
     return ''
   }
 
-  const { content, lvl } = tocList.shift()
+  const item = tocList.shift()!
+  const { content, lvl } = item
   const slug = slugger.slug(content)
 
   let html = `<li><span><a class="toc-h${lvl}" href="#${slug}">${content}</a><span class="dots"></span></span>`
@@ -115,7 +146,7 @@ const generateHtmlToc = (tocList, slugger, currentLevel, options) => {
   return html
 }
 
-export const getHtmlToc = (toc, options = {}) => {
+export const getHtmlToc = (toc: TocItem[], options: TocOptions = {}): string => {
   const list = cloneObj(toc)
   const slugger = new Slugger()
   const tocList = generateHtmlToc(list, slugger, 0, options)

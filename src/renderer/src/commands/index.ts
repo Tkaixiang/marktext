@@ -12,29 +12,50 @@ export { default as QuickOpenCommand } from './quickOpen'
 export { default as SpellcheckerLanguageCommand } from './spellcheckerLanguage'
 export { default as TrailingNewlineCommand } from './trailingNewline'
 
+export interface CommandSubcommand {
+  id: string
+  description: string
+  value?: string | number
+  execute?: () => Promise<void>
+}
+
+export interface Command {
+  id: string
+  description?: string
+  shortcut?: string[]
+  subcommands?: CommandSubcommand[]
+  execute?: () => Promise<void>
+  executeSubcommand?: (id: string, value: any) => Promise<void>
+}
+
 export class RootCommand {
-  constructor(subcommands = []) {
+  id: string
+  description: string
+  subcommands: Command[]
+  subcommandSelectedIndex: number
+
+  constructor(subcommands: Command[] = []) {
     this.id = '#'
     this.description = '#'
     this.subcommands = subcommands
     this.subcommandSelectedIndex = -1
   }
 
-  async run() {}
-  async unload() {}
+  async run(): Promise<void> {}
+  async unload(): Promise<void> {}
 
   // Execute the command.
-  async execute() {
+  async execute(): Promise<void> {
     throw new Error('Root command.')
   }
 }
 
-const focusEditorAndExecute = (fn) => {
+const focusEditorAndExecute = (fn: () => void): void => {
   setTimeout(() => bus.emit('editor-focus'), 10)
   setTimeout(() => fn(), 150)
 }
 
-const commands = [
+const commands: Command[] = [
   // --------------------------------------------------------------------------
   // File
 
@@ -508,7 +529,7 @@ const commands = [
         value: 2.0
       }
     ],
-    executeSubcommand: async (_, value) => {
+    executeSubcommand: async (_id: string, value: number) => {
       bus.emit('mt::window-zoom', value)
     }
   },
@@ -550,7 +571,7 @@ const commands = [
         value: 'ulysses'
       }
     ],
-    executeSubcommand: async (_, theme) => {
+    executeSubcommand: async (_id: string, theme: string) => {
       window.electron.ipcRenderer.send('mt::set-user-preference', { theme })
     }
   },
@@ -603,7 +624,7 @@ const commands = [
         value: 'rtl'
       }
     ],
-    executeSubcommand: async (_, value) => {
+    executeSubcommand: async (_id: string, value: string) => {
       window.electron.ipcRenderer.send('mt::set-user-preference', { textDirection: value })
     }
   },
@@ -679,9 +700,9 @@ if (isOsx) {
 }
 
 // Function to get commands with updated descriptions
-export const getCommandsWithDescriptions = async () => {
+export const getCommandsWithDescriptions = async (): Promise<Command[]> => {
   // Update descriptions for all commands
-  const updateDescriptions = (commandList) => {
+  const updateDescriptions = (commandList: Command[]): void => {
     for (const item of commandList) {
       const { id, subcommands } = item
       // Always update description for commands with ID, regardless of existing description
@@ -711,7 +732,7 @@ export const getCommandsWithDescriptions = async () => {
 
       // Also update other subcommands descriptions
       if (subcommands && Array.isArray(subcommands)) {
-        updateDescriptions(subcommands)
+        updateDescriptions(subcommands as Command[])
       }
     }
   }

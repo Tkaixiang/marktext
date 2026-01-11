@@ -2,11 +2,19 @@ import { delay } from '@/util'
 import bus from '../bus'
 import getCommandDescriptionById from './descriptions'
 import { t } from '../i18n'
+import type { EditorState, Subcommand } from './lineEnding'
 
 const descriptions = ['Trim all trailing newlines', 'Ensure single newline', 'Disabled']
 
 class TrailingNewlineCommand {
-  constructor(editorState) {
+  id: string
+  description: string
+  placeholder: string
+  subcommands: Subcommand[]
+  subcommandSelectedIndex: number
+  private _editorState: EditorState
+
+  constructor(editorState: EditorState) {
     this.id = 'file.trailing-newline'
     this.description = getCommandDescriptionById('file.trailing-newline')
     this.placeholder = t('commandPalette.placeholders.selectOption')
@@ -17,9 +25,9 @@ class TrailingNewlineCommand {
     this._editorState = editorState
   }
 
-  run = async () => {
-    const { trimTrailingNewline } = this._editorState.currentFile
-    let index = trimTrailingNewline
+  run = async (): Promise<void> => {
+    const trimTrailingNewline = this._editorState.currentFile?.trimTrailingNewline
+    let index = trimTrailingNewline ?? 2
     if (index !== 0 && index !== 1) {
       index = 2
     }
@@ -45,17 +53,17 @@ class TrailingNewlineCommand {
     this.subcommandSelectedIndex = index
   }
 
-  execute = async () => {
+  execute = async (): Promise<void> => {
     // Timeout to hide the command palette and then show again to prevent issues.
     await delay(100)
     bus.emit('show-command-palette', this)
   }
 
-  executeSubcommand = async (_, value) => {
+  executeSubcommand = async (_id: string, value: number): Promise<void> => {
     bus.emit('mt::set-final-newline', value)
   }
 
-  unload = () => {}
+  unload = (): void => {}
 }
 
 export default TrailingNewlineCommand

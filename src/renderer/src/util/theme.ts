@@ -9,18 +9,23 @@ import { dark, graphite, materialDark, oneDark, ulysses } from './themeColor'
 import { isLinux } from './index'
 
 const ORIGINAL_THEME = '#409EFF'
-const patchTheme = (css) => {
+const patchTheme = (css: string): string => {
   return `@media not print {\n${css}\n}`
 }
 
-const getEmojiPickerPatch = () => {
+const getEmojiPickerPatch = (): string => {
   return isLinux
     ? '.ag-emoji-picker section .emoji-wrapper .item span { font-family: sans-serif, "Noto Color Emoji"; }'
     : ''
 }
 
-const getThemeCluster = (themeColor) => {
-  const tintColor = (color, tint) => {
+interface ThemeCluster {
+  color: string
+  variable: string
+}
+
+const getThemeCluster = (themeColor: string): ThemeCluster[] => {
+  const tintColor = (color: string, tint: number): string => {
     let red = parseInt(color.slice(1, 3), 16)
     let green = parseInt(color.slice(3, 5), 16)
     let blue = parseInt(color.slice(5, 7), 16)
@@ -31,14 +36,14 @@ const getThemeCluster = (themeColor) => {
       red += Math.round(tint * (255 - red))
       green += Math.round(tint * (255 - green))
       blue += Math.round(tint * (255 - blue))
-      red = red.toString(16)
-      green = green.toString(16)
-      blue = blue.toString(16)
-      return `#${red}${green}${blue}`
+      const redHex = red.toString(16)
+      const greenHex = green.toString(16)
+      const blueHex = blue.toString(16)
+      return `#${redHex}${greenHex}${blueHex}`
     }
   }
 
-  const clusters = [
+  const clusters: ThemeCluster[] = [
     {
       color: themeColor,
       variable: 'var(--themeColor)'
@@ -54,11 +59,13 @@ const getThemeCluster = (themeColor) => {
   return clusters
 }
 
-export const addThemeStyle = (theme) => {
+export type ThemeName = 'light' | 'dark' | 'material-dark' | 'ulysses' | 'graphite' | 'one-dark'
+
+export const addThemeStyle = (theme: ThemeName | string): void => {
   const isCmRailscasts = railscastsThemes.includes(theme)
   const isCmOneDark = oneDarkThemes.includes(theme)
   const isDarkTheme = isCmOneDark || isCmRailscasts
-  let themeStyleEle = document.querySelector(`#${THEME_STYLE_ID}`)
+  let themeStyleEle = document.querySelector(`#${THEME_STYLE_ID}`) as HTMLStyleElement | null
   if (!themeStyleEle) {
     themeStyleEle = document.createElement('style')
     themeStyleEle.id = THEME_STYLE_ID
@@ -110,7 +117,7 @@ export const addThemeStyle = (theme) => {
   }
 }
 
-export const setWrapCodeBlocks = (value) => {
+export const setWrapCodeBlocks = (value: boolean): void => {
   const CODE_WRAP_STYLE_ID = 'ag-code-wrap'
   let result = ''
   if (value) {
@@ -120,7 +127,7 @@ export const setWrapCodeBlocks = (value) => {
     result =
       '.ag-code-content { display: block; white-space: pre; word-break: break-word; overflow: auto; }'
   }
-  let styleEle = document.querySelector(`#${CODE_WRAP_STYLE_ID}`)
+  let styleEle = document.querySelector(`#${CODE_WRAP_STYLE_ID}`) as HTMLStyleElement | null
   if (!styleEle) {
     styleEle = document.createElement('style')
     styleEle.setAttribute('id', CODE_WRAP_STYLE_ID)
@@ -130,14 +137,14 @@ export const setWrapCodeBlocks = (value) => {
   styleEle.innerHTML = result
 }
 
-export const setEditorWidth = (value) => {
+export const setEditorWidth = (value: string): void => {
   const EDITOR_WIDTH_STYLE_ID = 'editor-width'
   let result = ''
   if (value && /^[0-9]+(?:ch|px|%)$/.test(value)) {
     // Overwrite the theme value and add 100px for padding.
     result = `:root { --editorAreaWidth: calc(100px + ${value}); }`
   }
-  let styleEle = document.querySelector(`#${EDITOR_WIDTH_STYLE_ID}`)
+  let styleEle = document.querySelector(`#${EDITOR_WIDTH_STYLE_ID}`) as HTMLStyleElement | null
   if (!styleEle) {
     styleEle = document.createElement('style')
     styleEle.setAttribute('id', EDITOR_WIDTH_STYLE_ID)
@@ -147,9 +154,15 @@ export const setEditorWidth = (value) => {
   styleEle.innerHTML = result
 }
 
-export const addCommonStyle = (options) => {
+export interface CommonStyleOptions {
+  codeFontFamily: string
+  codeFontSize: number
+  hideScrollbar: boolean
+}
+
+export const addCommonStyle = (options: CommonStyleOptions): void => {
   const { codeFontFamily, codeFontSize, hideScrollbar } = options
-  let sheet = document.querySelector(`#${COMMON_STYLE_ID}`)
+  let sheet = document.querySelector(`#${COMMON_STYLE_ID}`) as HTMLStyleElement | null
   if (!sheet) {
     sheet = document.createElement('style')
     sheet.id = COMMON_STYLE_ID
@@ -177,11 +190,15 @@ ${getEmojiPickerPatch()}
 `
 }
 
-export const addCustomStyle = (options) => {
+export interface CustomStyleOptions {
+  customCss?: string
+}
+
+export const addCustomStyle = (options: CustomStyleOptions): void => {
   const { customCss } = options
   if (!customCss) return
 
-  let customStyleEle = document.querySelector('#custom-styles')
+  let customStyleEle = document.querySelector('#custom-styles') as HTMLStyleElement | null
   if (!customStyleEle) {
     customStyleEle = document.createElement('style')
     customStyleEle.id = 'custom-styles'
@@ -190,8 +207,12 @@ export const addCustomStyle = (options) => {
   customStyleEle.innerHTML = customCss
 }
 
+export interface StyleOptions extends CommonStyleOptions, CustomStyleOptions {
+  theme: ThemeName | string
+}
+
 // Append common sheet and theme at the end of head - order is important.
-export const addStyles = (options) => {
+export const addStyles = (options: StyleOptions): void => {
   const { theme } = options
   addThemeStyle(theme)
   addCommonStyle(options)

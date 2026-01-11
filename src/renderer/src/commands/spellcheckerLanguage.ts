@@ -6,9 +6,28 @@ import { getLanguageName } from '@/spellchecker/languageMap'
 import getCommandDescriptionById from './descriptions'
 import { t } from '../i18n'
 
+export interface SpellcheckerSubcommand {
+  id: string
+  description: string
+  value: string
+}
+
+export interface SpellcheckerInstance {
+  lang: string
+  isEnabled: boolean
+}
+
 // Command to switch the spellchecker language
 class SpellcheckerLanguageCommand {
-  constructor(spellchecker) {
+  id: string
+  description: string
+  placeholder: string
+  shortcut: string | null
+  spellchecker: SpellcheckerInstance
+  subcommands: SpellcheckerSubcommand[]
+  subcommandSelectedIndex: number
+
+  constructor(spellchecker: SpellcheckerInstance) {
     this.id = 'spellchecker.switch-language'
     this.description = getCommandDescriptionById('spellchecker.switch-language')
     this.placeholder = t('commandPalette.placeholders.selectLanguage')
@@ -20,7 +39,7 @@ class SpellcheckerLanguageCommand {
     this.subcommandSelectedIndex = -1
   }
 
-  run = async () => {
+  run = async (): Promise<void> => {
     const langs = await SpellChecker.getAvailableDictionaries()
 
     const finalLangs = langs.length > 0 ? langs : ['en-US']
@@ -38,15 +57,15 @@ class SpellcheckerLanguageCommand {
     )
   }
 
-  execute = async () => {
+  execute = async (): Promise<void> => {
     // Timeout to hide the command palette and then show again to prevent issues.
     await delay(100)
     bus.emit('show-command-palette', this)
   }
 
-  executeSubcommand = async (id) => {
+  executeSubcommand = async (id: string): Promise<void> => {
     const command = this.subcommands.find((cmd) => cmd.id === id)
-    if (this.spellchecker.isEnabled) {
+    if (this.spellchecker.isEnabled && command) {
       bus.emit('switch-spellchecker-language', command.value)
     } else {
       notice.notify({
@@ -57,7 +76,7 @@ class SpellcheckerLanguageCommand {
     }
   }
 
-  unload = () => {
+  unload = (): void => {
     this.subcommands = []
   }
 }
