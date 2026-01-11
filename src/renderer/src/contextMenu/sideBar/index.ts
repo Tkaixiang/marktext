@@ -8,14 +8,15 @@ import {
   getPASTE,
   getRENAME,
   getDELETE,
-  getSHOW_IN_FOLDER
+  getSHOW_IN_FOLDER,
+  MenuItem
 } from './menuItems'
 
-export const showContextMenu = (event, hasPathCache) => {
+export const showContextMenu = (event: MouseEvent, hasPathCache: boolean): void => {
   const menu = new RemoteMenu()
   const win = getCurrentWindow()
-  // 动态获取菜单项以确保翻译正确
-  const contextItems = [
+  // Dynamically get menu items to ensure correct translations
+  const contextItems: MenuItem[] = [
     getNEW_FILE(),
     getNEW_DIRECTORY(),
     SEPARATOR,
@@ -31,8 +32,8 @@ export const showContextMenu = (event, hasPathCache) => {
 
   contextItems[5].enabled = hasPathCache // PASTE item
 
-  contextItems.forEach(item => {
-    menu.append(new RemoteMenuItem(item))
+  contextItems.forEach((item) => {
+    menu.append(new RemoteMenuItem(item as Electron.MenuItemConstructorOptions))
   })
-  menu.popup([{ window: win, x: event.clientX, y: event.clientY }])
+  menu.popup({ window: win, x: event.clientX, y: event.clientY })
 }

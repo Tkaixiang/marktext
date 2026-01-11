@@ -1,78 +1,86 @@
 import * as contextMenu from './actions'
 import { t } from '../../i18n'
 
+export interface MenuItem {
+  type?: string
+  label?: string
+  id?: string
+  enabled?: boolean
+  click?: () => void
+}
+
 // NOTE: This are mutable fields that may change at runtime.
 
-export const SEPARATOR = {
+export const SEPARATOR: MenuItem = {
   type: 'separator'
 }
 
-// 使用函数形式避免模块加载时调用翻译函数
-export const getNEW_FILE = () => ({
+// Use function form to avoid calling translation function at module load time
+export const getNEW_FILE = (): MenuItem => ({
   label: t('contextMenu.sideBar.newFile'),
   id: 'newFileMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.newFile()
   }
 })
 
-export const getNEW_DIRECTORY = () => ({
+export const getNEW_DIRECTORY = (): MenuItem => ({
   label: t('contextMenu.sideBar.newDirectory'),
   id: 'newDirectoryMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.newDirectory()
   }
 })
 
-export const getCOPY = () => ({
+export const getCOPY = (): MenuItem => ({
   label: t('contextMenu.sideBar.copy'),
   id: 'copyMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.copy()
   }
 })
 
-export const getCUT = () => ({
+export const getCUT = (): MenuItem => ({
   label: t('contextMenu.sideBar.cut'),
   id: 'cutMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.cut()
   }
 })
 
-export const getPASTE = () => ({
+export const getPASTE = (): MenuItem => ({
   label: t('contextMenu.sideBar.paste'),
   id: 'pasteMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.paste()
   }
 })
 
-export const getRENAME = () => ({
+export const getRENAME = (): MenuItem => ({
   label: t('contextMenu.sideBar.rename'),
   id: 'renameMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.rename()
   }
 })
 
-export const getDELETE = () => ({
+export const getDELETE = (): MenuItem => ({
   label: t('contextMenu.sideBar.moveToTrash'),
   id: 'deleteMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.remove()
   }
 })
 
-export const getSHOW_IN_FOLDER = () => ({
+export const getSHOW_IN_FOLDER = (): MenuItem => ({
   label: t('contextMenu.sideBar.showInFolder'),
   id: 'showInFolderMenuItem',
-  click (menuItem, browserWindow) {
+  click(): void {
     contextMenu.showInFolder()
   }
 })
 
-// 为了向后兼容，保留原有的导出
+// For backwards compatibility, keep original exports
 export const NEW_FILE = getNEW_FILE()
 export const NEW_DIRECTORY = getNEW_DIRECTORY()
 export const COPY = getCOPY()
