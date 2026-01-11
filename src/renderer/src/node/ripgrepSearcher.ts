@@ -23,13 +23,66 @@
 
 import { spawn } from 'child_process'
 
-function cleanResultLine(resultLine) {
-  resultLine = getText(resultLine)
-
-  return resultLine[resultLine.length - 1] === '\n' ? resultLine.slice(0, -1) : resultLine
+interface TextInput {
+  text?: string
+  bytes?: string
 }
 
-function getPositionFromColumn(lines, column) {
+interface Submatch {
+  start: number
+  end: number
+  match: TextInput
+}
+
+interface Match {
+  lines: TextInput
+  line_number: number
+  submatches: Submatch[]
+}
+
+interface MatchResult {
+  matchText: string
+  lineText: string
+  range: [[number, number], [number, number]]
+  leadingContextLines: string[]
+  trailingContextLines: string[]
+}
+
+export interface SearchResult {
+  filePath: string
+  matches: MatchResult[]
+}
+
+export interface SearchOptions {
+  didMatch?: (result: SearchResult) => void
+  didSearchPaths?: (count: number) => void
+  inclusions?: string[]
+  exclusions?: string[]
+  noIgnore?: boolean
+  followSymlinks?: boolean
+  isWholeWord?: boolean
+  isRegexp?: boolean
+  isCaseSensitive?: boolean
+  maxFileSize?: number
+  includeHidden?: boolean
+  leadingContextLineCount?: number
+  trailingContextLineCount?: number
+}
+
+interface NumPathsFound {
+  num: number
+}
+
+export interface CancellablePromise<T> extends Promise<T> {
+  cancel: () => void
+}
+
+function cleanResultLine(resultLine: TextInput): string {
+  const text = getText(resultLine)
+  return text[text.length - 1] === '\n' ? text.slice(0, -1) : text
+}
+
+function getPositionFromColumn(lines: string[], column: number): [number, number] {
   let currentLength = 0
   let currentLine = 0
   let previousLength = 0
@@ -43,7 +96,7 @@ function getPositionFromColumn(lines, column) {
   return [currentLine - 1, column - previousLength]
 }
 
-function processUnicodeMatch(match) {
+function processUnicodeMatch(match: Match): void {
   const text = getText(match.lines)
 
   if (text.length === Buffer.byteLength(text)) {
@@ -55,7 +108,7 @@ function processUnicodeMatch(match) {
   let currentLength = 0
   let previousPosition = 0
 
-  function convertPosition(position) {
+  function convertPosition(position: number): number {
     const currentBuffer = remainingBuffer.slice(0, position - previousPosition)
     currentLength = currentBuffer.toString().length + currentLength
     remainingBuffer = remainingBuffer.slice(position - previousPosition)
@@ -76,9 +129,13 @@ function processUnicodeMatch(match) {
 
 // This function processes a ripgrep submatch to create the correct
 // range. This is mostly needed for multi-line results, since the range
-// will have differnt start and end rows and we need to calculate these
+// will have different start and end rows and we need to calculate these
 // based on the lines that ripgrep returns.
-function processSubmatch(submatch, lineText, offsetRow) {
+function processSubmatch(
+  submatch: Submatch,
+  lineText: string,
+  offsetRow: number
+): { range: [[number, number], [number, number]]; lineText: string } {
   const lineParts = lineText.split('\n')
 
   const start = getPositionFromColumn(lineParts, submatch.start)
@@ -103,13 +160,17 @@ function processSubmatch(submatch, lineText, offsetRow) {
   }
 }
 
-function getText(input) {
-  return 'text' in input ? input.text : Buffer.from(input.bytes, 'base64').toString()
+function getText(input: TextInput): string {
+  return 'text' in input && input.text !== undefined
+    ? input.text
+    : Buffer.from(input.bytes || '', 'base64').toString()
 }
 
 class RipgrepDirectorySearcher {
+  protected rgPath: string
+
   constructor() {
-    this.rgPath = global.marktext.paths.ripgrepBinaryPath
+    this.rgPath = (global as any).marktext.paths.ripgrepBinaryPath
   }
 
   // Performs a text search for files in the specified `Directory`s, subject to the
@@ -146,28 +207,37 @@ class RipgrepDirectorySearcher {
 
   // Returns a *thenable* `DirectorySearch` that includes a `cancel()` method. If `cancel()` is
   // invoked before the `DirectorySearch` is determined, it will resolve the `DirectorySearch`.
-  search(directories, pattern, options) {
-    const numPathsFound = { num: 0 }
+  search(
+    directories: string[],
+    pattern: string,
+    options: SearchOptions
+  ): CancellablePromise<void[]> {
+    const numPathsFound: NumPathsFound = { num: 0 }
 
     const allPromises = directories.map((directory) =>
       this.searchInDirectory(directory, pattern, options, numPathsFound)
     )
 
-    const promise = Promise.all(allPromises)
+    const promise = Promise.all(allPromises) as CancellablePromise<void[]>
 
-    promise.cancel = () => {
-      for (const promise of allPromises) {
-        promise.cancel()
+    promise.cancel = (): void => {
+      for (const p of allPromises) {
+        p.cancel()
       }
     }
 
     return promise
   }
 
-  searchInDirectory(directoryPath, pattern, options, numPathsFound) {
-    let regexpStr = null
-    let textPattern = null
-    const args = ['--json']
+  searchInDirectory(
+    directoryPath: string,
+    pattern: string,
+    options: SearchOptions,
+    numPathsFound: NumPathsFound
+  ): CancellablePromise<void> {
+    let regexpStr: string | null = null
+    let textPattern: string | null = null
+    const args: string[] = ['--json']
 
     if (options.isRegexp) {
       regexpStr = this.prepareRegexp(pattern)
@@ -203,15 +273,15 @@ class RipgrepDirectorySearcher {
     }
 
     if (options.leadingContextLineCount) {
-      args.push('--before-context', options.leadingContextLineCount)
+      args.push('--before-context', String(options.leadingContextLineCount))
     }
     if (options.trailingContextLineCount) {
-      args.push('--after-context', options.trailingContextLineCount)
+      args.push('--after-context', String(options.trailingContextLineCount))
     }
-    for (const inclusion of this.prepareGlobs(options.inclusions, directoryPath)) {
+    for (const inclusion of this.prepareGlobs(options.inclusions || [], directoryPath)) {
       args.push('--iglob', inclusion)
     }
-    for (const exclusion of this.prepareGlobs(options.exclusions, directoryPath)) {
+    for (const exclusion of this.prepareGlobs(options.exclusions || [], directoryPath)) {
       args.push('--iglob', '!' + exclusion)
     }
 
@@ -230,20 +300,20 @@ class RipgrepDirectorySearcher {
         stdio: ['pipe', 'pipe', 'pipe']
       })
     } catch (err) {
-      return Promise.reject(err)
+      return Promise.reject(err) as CancellablePromise<void>
     }
 
-    const didMatch = options.didMatch || (() => {})
+    const didMatch = options.didMatch || ((): void => {})
     let cancelled = false
 
-    const returnedPromise = new Promise((resolve, reject) => {
+    const returnedPromise = new Promise<void>((resolve, reject) => {
       let buffer = ''
       let bufferError = ''
-      let pendingEvent
-      let pendingLeadingContext
-      let pendingTrailingContexts
+      let pendingEvent: SearchResult | null = null
+      let pendingLeadingContext: string[] = []
+      let pendingTrailingContexts: Set<string[]> = new Set()
 
-      child.on('close', (code, signal) => {
+      child!.on('close', (code, _signal) => {
         // code 1 is used when no results are found.
         if (code !== null && code > 1) {
           reject(new Error(bufferError))
@@ -251,22 +321,22 @@ class RipgrepDirectorySearcher {
           resolve()
         }
       })
-      child.on('error', (err) => {
+      child!.on('error', (err) => {
         reject(err)
       })
 
-      child.stderr.on('data', (chunk) => {
+      child!.stderr!.on('data', (chunk) => {
         bufferError += chunk
       })
 
-      child.stdout.on('data', (chunk) => {
+      child!.stdout!.on('data', (chunk) => {
         if (cancelled) {
           return
         }
 
         buffer += chunk
         const lines = buffer.split('\n')
-        buffer = lines.pop()
+        buffer = lines.pop() || ''
         for (const line of lines) {
           const message = JSON.parse(line)
           if (message.type === 'begin') {
@@ -277,7 +347,7 @@ class RipgrepDirectorySearcher {
             pendingLeadingContext = []
             pendingTrailingContexts = new Set()
           } else if (message.type === 'match') {
-            const trailingContextLines = []
+            const trailingContextLines: string[] = []
             pendingTrailingContexts.add(trailingContextLines)
             processUnicodeMatch(message.data)
             for (const submatch of message.data.submatches) {
@@ -287,7 +357,7 @@ class RipgrepDirectorySearcher {
                 message.data.line_number - 1
               )
 
-              pendingEvent.matches.push({
+              pendingEvent!.matches.push({
                 matchText: getText(submatch.match),
                 lineText,
                 range,
@@ -296,16 +366,16 @@ class RipgrepDirectorySearcher {
               })
             }
           } else if (message.type === 'end') {
-            options.didSearchPaths(++numPathsFound.num)
-            didMatch(pendingEvent)
+            options.didSearchPaths?.(++numPathsFound.num)
+            didMatch(pendingEvent!)
             pendingEvent = null
           }
         }
       })
-    })
+    }) as CancellablePromise<void>
 
-    returnedPromise.cancel = () => {
-      child.kill()
+    returnedPromise.cancel = (): void => {
+      child!.kill()
       cancelled = true
     }
 
@@ -315,8 +385,8 @@ class RipgrepDirectorySearcher {
   // We need to prepare the "globs" that we receive from the user to make their behaviour more
   // user-friendly (e.g when adding `src/` the user probably means `src/**/*`).
   // This helper function takes care of that.
-  prepareGlobs(globs, projectRootPath) {
-    const output = []
+  prepareGlobs(globs: string[], projectRootPath: string): string[] {
+    const output: string[] = []
 
     for (let pattern of globs) {
       // we need to replace path separators by slashes since globs should
@@ -353,7 +423,7 @@ class RipgrepDirectorySearcher {
     return output
   }
 
-  prepareRegexp(regexpStr) {
+  prepareRegexp(regexpStr: string): string {
     // ripgrep handles `--` as the arguments separator, so we need to escape it if the
     // user searches for that exact same string.
     if (regexpStr === '--') {
@@ -367,7 +437,7 @@ class RipgrepDirectorySearcher {
     return regexpStr
   }
 
-  isMultilineRegexp(regexpStr) {
+  isMultilineRegexp(regexpStr: string): boolean {
     if (regexpStr.includes('\\n')) {
       return true
     }

@@ -1,15 +1,17 @@
 import EnvPaths from 'common/envPaths'
 
-// // "vscode-ripgrep" is unpacked out of asar because of the binary.
+// "vscode-ripgrep" is unpacked out of asar because of the binary.
 const rgDiskPath = window.rgPath.replace(/\bapp\.asar\b/, 'app.asar.unpacked')
 
 class RendererPaths extends EnvPaths {
+  private _ripgrepBinaryPath: string
+
   /**
    * Configure and sets all application paths.
    *
-   * @param {string} userDataPath The user data path.
+   * @param userDataPath The user data path.
    */
-  constructor(userDataPath) {
+  constructor(userDataPath: string) {
     if (!userDataPath) {
       throw new Error('No user data path is given.')
     }
@@ -27,7 +29,7 @@ class RendererPaths extends EnvPaths {
   }
 
   // Returns the path to ripgrep on disk.
-  get ripgrepBinaryPath() {
+  get ripgrepBinaryPath(): string {
     return this._ripgrepBinaryPath
   }
 }
