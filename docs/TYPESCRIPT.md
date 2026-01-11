@@ -1141,6 +1141,31 @@ The migration is complete when:
 #### 3.2 Renderer Utils Migration
 - [x] src/renderer/src/util/index.ts
 - [x] src/renderer/src/util/clipboard.ts
+- [x] src/renderer/src/util/themeColor.ts
+- [x] src/renderer/src/util/dompurify.ts
+- [x] src/renderer/src/util/day.ts
+- [x] src/renderer/src/util/fs-extra-polyfill.ts
+- [x] src/renderer/src/util/theme.ts
+- [x] src/renderer/src/util/markdownToHtml.ts
+- [x] src/renderer/src/util/listToTree.ts
+- [x] src/renderer/src/util/fileSystem.ts
+- [x] src/renderer/src/util/pdf.ts
+- [x] src/renderer/src/config.ts
+
+#### 3.2.1 Renderer Services Migration
+- [x] src/renderer/src/services/index.ts
+- [x] src/renderer/src/services/printService.ts
+- [x] src/renderer/src/services/notification/index.ts
+
+#### 3.2.2 Renderer Commands Migration
+- [x] src/renderer/src/commands/index.ts
+- [x] src/renderer/src/commands/descriptions.ts
+- [x] src/renderer/src/commands/utils.ts
+- [x] src/renderer/src/commands/fileEncoding.ts
+- [x] src/renderer/src/commands/lineEnding.ts
+- [x] src/renderer/src/commands/quickOpen.ts
+- [x] src/renderer/src/commands/spellcheckerLanguage.ts
+- [x] src/renderer/src/commands/trailingNewline.ts
 
 #### 3.3 Preload Script Migration
 - [x] src/preload/index.ts
