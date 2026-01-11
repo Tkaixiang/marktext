@@ -1167,6 +1167,28 @@ The migration is complete when:
 - [x] src/renderer/src/commands/spellcheckerLanguage.ts
 - [x] src/renderer/src/commands/trailingNewline.ts
 
+#### 3.2.3 Renderer Core Modules Migration
+- [x] src/renderer/src/bus/index.ts
+- [x] src/renderer/src/i18n/index.ts
+- [x] src/renderer/src/spellchecker/index.ts
+- [x] src/renderer/src/spellchecker/languageMap.ts
+- [x] src/renderer/src/bootstrap.ts
+- [x] src/renderer/src/axios/index.ts
+- [x] src/renderer/src/router/index.ts
+
+#### 3.2.4 Renderer Node Utilities Migration
+- [x] src/renderer/src/node/paths.ts
+- [x] src/renderer/src/node/ripgrepSearcher.ts
+- [x] src/renderer/src/node/fileSearcher.ts
+
+#### 3.2.5 Renderer Context Menu Migration
+- [x] src/renderer/src/contextMenu/sideBar/actions.ts
+- [x] src/renderer/src/contextMenu/sideBar/menuItems.ts
+- [x] src/renderer/src/contextMenu/sideBar/index.ts
+- [x] src/renderer/src/contextMenu/tabs/actions.ts
+- [x] src/renderer/src/contextMenu/tabs/menuItems.ts
+- [x] src/renderer/src/contextMenu/tabs/index.ts
+
 #### 3.3 Preload Script Migration
 - [x] src/preload/index.ts
 
