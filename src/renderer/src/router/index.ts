@@ -1,3 +1,4 @@
+import { RouteRecordRaw } from 'vue-router'
 import App from '@/pages/app'
 import Preference from '@/pages/preference'
 import General from '@/prefComponents/general'
@@ -8,7 +9,7 @@ import Theme from '@/prefComponents/theme'
 import Image from '@/prefComponents/image'
 import Keybindings from '@/prefComponents/keybindings'
 
-const parseSettingsPage = (type) => {
+const parseSettingsPage = (type: string): string => {
   let pageUrl = '/preference'
   if (/\/spelling$/.test(type)) {
     pageUrl += '/spelling'
@@ -16,7 +17,7 @@ const parseSettingsPage = (type) => {
   return pageUrl
 }
 
-const routes = (type) => [
+const routes = (type: string): RouteRecordRaw[] => [
   {
     path: '/',
     redirect: type === 'editor' ? '/editor' : parseSettingsPage(type)

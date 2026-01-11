@@ -1,14 +1,30 @@
 import log from 'electron-log/renderer'
 import RendererPaths from './node/paths'
 
-let exceptionLogger = (s) => console.error(s)
+type ExceptionLogger = (s: unknown) => void
 
-const configureLogger = () => {
+let exceptionLogger: ExceptionLogger = (s) => console.error(s)
+
+const configureLogger = (): void => {
   log.transports.console.level = process.env.NODE_ENV === 'development' ? 'info' : false // mirror to window console
   exceptionLogger = log.error
 }
 
-const parseUrlArgs = () => {
+interface ParsedUrlArgs {
+  type: string | null
+  debug: boolean
+  userDataPath: string | null
+  windowId: number
+  initialState: {
+    codeFontFamily: string | null
+    codeFontSize: string | null
+    hideScrollbar: boolean
+    theme: string | null
+    titleBarStyle: string | null
+  }
+}
+
+const parseUrlArgs = (): ParsedUrlArgs => {
   const params = new URLSearchParams(window.location.search)
   const codeFontFamily = params.get('cff')
   const codeFontSize = params.get('cfs')
@@ -39,16 +55,23 @@ const parseUrlArgs = () => {
   }
 }
 
-const handleRendererError = (event) => {
-  if (event.error) {
-    const { message, name, stack } = event.error
+interface ErrorLike {
+  message: string
+  name: string
+  stack?: string
+}
+
+const handleRendererError = (event: ErrorEvent | PromiseRejectionEvent): void => {
+  const error = 'error' in event ? event.error : (event as PromiseRejectionEvent).reason
+  if (error) {
+    const { message, name, stack } = error as ErrorLike
     const copy = {
       message,
       name,
       stack
     }
 
-    exceptionLogger(event.error)
+    exceptionLogger(error)
 
     // Pass exception to main process exception handler to show a error dialog.
     window.electron.ipcRenderer.send('mt::handle-renderer-error', copy)
@@ -57,14 +80,25 @@ const handleRendererError = (event) => {
   }
 }
 
-const bootstrapRenderer = () => {
+export interface MarktextGlobal {
+  initialState: ParsedUrlArgs['initialState']
+  env: {
+    debug: boolean
+    paths: RendererPaths
+    windowId: number
+    type: string | null
+  }
+  paths: RendererPaths
+}
+
+const bootstrapRenderer = (): void => {
   // Register renderer exception handler
   window.addEventListener('error', handleRendererError)
   window.addEventListener('unhandledrejection', handleRendererError)
 
   const { debug, initialState, userDataPath, windowId, type } = parseUrlArgs()
-  const paths = new RendererPaths(userDataPath)
-  const marktext = {
+  const paths = new RendererPaths(userDataPath || '')
+  const marktext: MarktextGlobal = {
     initialState,
     env: {
       debug,
@@ -74,7 +108,7 @@ const bootstrapRenderer = () => {
     },
     paths
   }
-  global.marktext = marktext
+  ;(global as any).marktext = marktext
 
   configureLogger()
 }

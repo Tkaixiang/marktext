@@ -4,12 +4,17 @@ import { isOsx } from '@/util'
  * High level spell checker API based on Chromium built-in spell checker.
  */
 export class SpellChecker {
+  enabled: boolean
+  currentSpellcheckerLanguage: string
+  isProviderAvailable: boolean
+
   /**
    * ctor
    *
-   * @param {boolean} enabled Whether spell checking is enabled in settings.
+   * @param enabled Whether spell checking is enabled in settings.
+   * @param lang The language code
    */
-  constructor(enabled = true, lang) {
+  constructor(enabled = true, lang = 'en-US') {
     this.enabled = enabled
     this.currentSpellcheckerLanguage = lang
 
@@ -21,17 +26,17 @@ export class SpellChecker {
   /**
    * Whether the spell checker is available and enabled.
    */
-  get isEnabled() {
+  get isEnabled(): boolean {
     return this.isProviderAvailable && this.enabled
   }
 
   /**
    * Enable the spell checker and sets `lang` or tries to find a fallback.
    *
-   * @param {string} lang The language to set.
-   * @returns {Promise<boolean>}
+   * @param lang The language to set.
+   * @returns Promise resolving to boolean
    */
-  async activateSpellchecker(lang) {
+  async activateSpellchecker(lang?: string): Promise<boolean> {
     try {
       this.enabled = true
       this.isProviderAvailable = true
@@ -49,7 +54,7 @@ export class SpellChecker {
   /**
    * Disables the native spell checker.
    */
-  deactivateSpellchecker() {
+  deactivateSpellchecker(): void {
     this.enabled = false
     this.isProviderAvailable = false
     window.electron.ipcRenderer.invoke('mt::spellchecker-set-enabled', false)
@@ -58,14 +63,14 @@ export class SpellChecker {
   /**
    * Return the current language.
    */
-  get lang() {
+  get lang(): string {
     if (this.isEnabled) {
       return this.currentSpellcheckerLanguage
     }
     return ''
   }
 
-  set lang(lang) {
+  set lang(lang: string) {
     this.currentSpellcheckerLanguage = lang
   }
 
@@ -74,10 +79,10 @@ export class SpellChecker {
    *
    * NOTE: This function can throw an exception.
    *
-   * @param {string} lang The language code
-   * @returns {Promise<boolean>} Return the language on success or null.
+   * @param lang The language code
+   * @returns Return true on success or false.
    */
-  async switchLanguage(lang) {
+  async switchLanguage(lang: string): Promise<boolean> {
     if (isOsx) {
       // NB: On macOS the OS spell checker is used and will detect the language automatically.
       return true
@@ -93,9 +98,9 @@ export class SpellChecker {
 
   /**
    * Returns a list of available dictionaries.
-   * @returns {Promise<string[]>} Available dictionary languages.
+   * @returns Available dictionary languages.
    */
-  static async getAvailableDictionaries() {
+  static async getAvailableDictionaries(): Promise<string[]> {
     if (isOsx) {
       // NB: On macOS the OS spell checker is used and will detect the language automatically.
       return []
