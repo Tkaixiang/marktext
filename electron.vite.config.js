@@ -63,7 +63,9 @@ export default defineConfig({
       vue(),
       svgLoader(),
       renderer({
-        nodeIntegration: true
+        // SECURITY FIX: Disable node integration in renderer for security
+        // Node.js APIs are now exposed via contextBridge in preload script
+        nodeIntegration: false
       })
     ],
     css: {

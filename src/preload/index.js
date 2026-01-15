@@ -1,5 +1,10 @@
 import { contextBridge, shell, clipboard, webUtils } from 'electron'
 import fs from 'fs-extra'
+import { statSync, constants as fsConstants } from 'fs'
+import { exec, execFile } from 'child_process'
+import { tmpdir } from 'os'
+import crypto from 'crypto'
+import { Buffer } from 'buffer'
 import { isFile, isDirectory, ensureDirSync } from 'common/filesystem'
 import { electronAPI } from '@electron-toolkit/preload'
 import {
@@ -28,15 +33,18 @@ const fileUtilsAPI = {
   isFile: (path) => isFile(path),
   isDirectory: (path) => isDirectory(path),
   emptyDir: (path) => fs.emptyDir(path),
-  copy: (src, dest) => fs.copy(src, dest),
+  copy: (src, dest, options) => fs.copy(src, dest, options),
   ensureDir: (path) => fs.ensureDir(path),
   outputFile: (path, data) => fs.outputFile(path, data),
-  move: (src, dest) => fs.move(src, dest),
+  move: (src, dest, options) => fs.move(src, dest, options),
   stat: (path) => fs.stat(path),
-  writeFile: (path, data) => fs.writeFile(path, data),
-  readFile: (path) => fs.readFile(path),
+  writeFile: (path, data, encoding) => fs.writeFile(path, data, encoding),
+  readFile: (path, encoding) => fs.readFile(path, encoding),
   ensureDirSync: (path) => ensureDirSync(path),
   pathExistsSync: (path) => fs.pathExistsSync(path),
+  unlink: (path) => fs.unlink(path),
+  statSync: (path) => statSync(path),
+  constants: fsConstants,
   isChildOfDirectory: (dir, child) => isChildOfDirectory(dir, child),
   hasMarkdownExtension: (filename) => hasMarkdownExtension(filename),
   MARKDOWN_INCLUSIONS,
@@ -78,6 +86,39 @@ const commandAPI = {
   }
 }
 
+// Crypto utilities API - for hashing operations
+const cryptoAPI = {
+  createHash: (algorithm) => crypto.createHash(algorithm)
+}
+
+// Child process API - for executing external commands (PicGo, custom scripts)
+// NOTE: This is potentially dangerous but required for image upload functionality
+// These should only be used with validated/sanitized input
+const childProcessAPI = {
+  exec: (command, options, callback) => exec(command, options, callback),
+  execFile: (file, args, options, callback) => execFile(file, args, options, callback)
+}
+
+// OS utilities API
+const osAPI = {
+  tmpdir: () => tmpdir()
+}
+
+// Process information API - selectively expose safe process info
+const processAPI = {
+  platform: process.platform,
+  env: {
+    HOME: process.env.HOME,
+    PATH: process.env.PATH,
+    USERPROFILE: process.env.USERPROFILE // For Windows
+  }
+}
+
+// Buffer API - needed for binary data operations
+const bufferAPI = {
+  from: (data, encoding) => Buffer.from(data, encoding)
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
@@ -92,14 +133,25 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('path', path)
     contextBridge.exposeInMainWorld('commandExists', commandAPI)
     contextBridge.exposeInMainWorld('i18nUtils', i18nUtils)
+    contextBridge.exposeInMainWorld('crypto', cryptoAPI)
+    contextBridge.exposeInMainWorld('childProcess', childProcessAPI)
+    contextBridge.exposeInMainWorld('os', osAPI)
+    contextBridge.exposeInMainWorld('process', processAPI)
+    contextBridge.exposeInMainWorld('Buffer', bufferAPI)
   } catch (error) {
     console.error(error)
   }
 } else {
+  // Fallback for when context isolation is disabled (insecure)
   window.electron = { ...electronAPI, ...customElectronAPI }
   window.rgPath = rgPath
   window.fileUtils = fileUtilsAPI
   window.path = path
   window.commandExists = commandAPI
   window.i18nUtils = i18nUtils
+  window.crypto = cryptoAPI
+  window.childProcess = childProcessAPI
+  window.os = osAPI
+  window.process = processAPI
+  window.Buffer = bufferAPI
 }
