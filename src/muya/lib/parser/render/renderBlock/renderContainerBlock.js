@@ -6,6 +6,7 @@ import { renderEditIcon } from './renderContainerEditIcon'
 import renderCopyButton from './renderCopyButton'
 import { renderLeftBar, renderBottomBar } from './renderTableDargBar'
 import { h } from '../snabbdom'
+import { getNestedIndex } from '../../../contentState/listHelpers'
 
 const PRE_BLOCK_HASH = {
   fencecode: `.${CLASS_OR_ID.AG_FENCE_CODE}`,
@@ -166,6 +167,10 @@ export default function renderContainerBlock (parent, block, activeBlocks, match
     }
   } else if (type === 'li' && listItemType) {
     Object.assign(data.dataset, { marker: bulletMarkerOrDelimiter })
+    if (block.parent.listType === 'order') {
+      const nestedIndex = getNestedIndex(block)
+      Object.assign(data.dataset, { label: `${nestedIndex}.` })
+    }
     selector += `.${CLASS_OR_ID.AG_LIST_ITEM}`
     selector += `.ag-${listItemType}-list-item`
     selector += isLooseListItem ? `.${CLASS_OR_ID.AG_LOOSE_LIST_ITEM}` : `.${CLASS_OR_ID.AG_TIGHT_LIST_ITEM}`

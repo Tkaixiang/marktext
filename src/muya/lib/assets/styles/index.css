@@ -499,9 +499,19 @@ table {
   margin-top: 0;
 }
 
-li.ag-task-list-item {
+li.ag-task-list-item,
+li.ag-order-list-item {
   list-style-type: none;
   position: relative;
+}
+
+li.ag-order-list-item::before {
+  content: attr(data-label);
+  position: absolute;
+  top: 0;
+  left: -23px;
+  text-align: right;
+  width: 20px;
 }
 
 li.ag-task-list-item > [type='checkbox'] {

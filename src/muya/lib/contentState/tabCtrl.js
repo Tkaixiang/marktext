@@ -118,6 +118,14 @@ const tabCtrl = ContentState => {
     return list && /ol|ul/.test(list.type) && listItem.preSibling
   }
 
+  ContentState.prototype.reRenderListHierarchy = function (startBlock) {
+    let rootList = startBlock
+    while (rootList.parent && rootList.parent.type === 'li') {
+      rootList = rootList.parent.parent // Jump up through list-item -> ul/ol -> list-item -> ul/ol
+    }
+    this.partialRender([rootList])
+  }
+
   ContentState.prototype.unindentListItem = function (block, type) {
     const pBlock = this.getParent(block)
     const listItem = this.getParent(pBlock)
@@ -158,7 +166,7 @@ const tabCtrl = ContentState => {
       }
     }
 
-    return this.partialRender()
+    this.reRenderListHierarchy(pBlock)
   }
 
   ContentState.prototype.indentListItem = function () {
@@ -184,7 +192,8 @@ const tabCtrl = ContentState => {
     }
 
     this.appendChild(newList, listItem)
-    return this.partialRender()
+    // After manipulation, trigger a re-render to update numbering.
+    this.reRenderListHierarchy(startBlock)
   }
 
   ContentState.prototype.insertTab = function (event) {
