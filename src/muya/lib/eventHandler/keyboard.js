@@ -20,6 +20,9 @@ class Keyboard {
   listen() {
     // cache shown float box
     this.muya.eventCenter.subscribe('muya-float', (tool, status) => {
+      // We should use tool.name here instead as Vue3's reactivity since objects are stored as Proxy objects
+      // This can cause reference issues if we use the original implementation of comparing via references.
+
       if (status) this.shownFloat[tool.name] = tool
       else delete this.shownFloat[tool.name]
 
