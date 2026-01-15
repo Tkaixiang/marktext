@@ -1,4 +1,4 @@
-<p align="center"><img src="../../static/logo-small.png" alt="MarkText" width="100" height="100"></p>
+<p align="center"><img src="/logo-small.png" alt="MarkText" width="100" height="100"></p>
 
 <h1 align="center">MarkText</h1>
 
@@ -64,7 +64,7 @@
 
 # 2. スクリーンショット
 
-![](../marktext.png?raw=true)
+![](/marktext.png)
 
 # 3. ✨機能 ⭐
 
@@ -90,19 +90,19 @@
 
 ## 3.1 🌙 テーマ🔆
 
-| Cadmium Light                                   | Dark                                          |
-| ----------------------------------------------- | --------------------------------------------- |
-| ![](../themeImages/cadmium-light.png?raw=true)  | ![](../themeImages/dark.png?raw=true)         |
-| Graphite Light                                  | Material Dark                                 |
-| ![](../themeImages/graphite-light.png?raw=true) | ![](../themeImages/materal-dark.png?raw=true) |
-| Ulysses Light                                   | One Dark                                      |
-| ![](../themeImages/ulysses-light.png?raw=true)  | ![](../themeImages/one-dark.png?raw=true)     |
+| Cadmium Light                        | Dark                               |
+| ------------------------------------ | ---------------------------------- |
+| ![](/themeImages/cadmium-light.png)  | ![](/themeImages/dark.png)         |
+| Graphite Light                       | Material Dark                      |
+| ![](/themeImages/graphite-light.png) | ![](/themeImages/materal-dark.png) |
+| Ulysses Light                        | One Dark                           |
+| ![](/themeImages/ulysses-light.png)  | ![](/themeImages/one-dark.png)     |
 
 ## 3.2 😸編集モード🐶
 
-|    ソースコード    |     タイプライター     |    フォーカス     |
-| :----------------: | :--------------------: | :---------------: |
-| ![](../source.gif) | ![](../typewriter.gif) | ![](../focus.gif) |
+|   ソースコード   |    タイプライター    |   フォーカス    |
+| :--------------: | :------------------: | :-------------: |
+| ![](/source.gif) | ![](/typewriter.gif) | ![](/focus.gif) |
 
 # 4. 動機
 
