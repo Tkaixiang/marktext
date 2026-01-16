@@ -485,7 +485,8 @@
       "spelling": "Spelling",
       "theme": "Theme",
       "image": "Image",
-      "keybindings": "Keybindings"
+      "keybindings": "Keybindings",
+      "experimental": "Experimental"
     },
     "general": {
       "title": "General",
@@ -879,6 +880,13 @@
         "unbind": "Unbind"
       }
     },
+    "experimental": {
+      "title": "Experimental",
+      "fileHandling": {
+        "title": "File Handling",
+        "autoReloadUnmodified": "Automatically reload unmodified documents when changed on disk"
+      }
+    },
     "selectFont": "Select Font",
     "spellchecker": {
       "autoDetectDescription": "Automatically detect document language",
@@ -1127,7 +1135,8 @@
       "exportSuccessTitle": "Exported successfully",
       "exportSuccessMessage": "Exported \"{name}\" successfully!",
       "fileRemovedOnDisk": "\"{name}\" has been removed on disk.",
-      "fileChangedOnDisk": "\"{name}\" has been changed on disk. Do you want to reload it?"
+      "fileChangedOnDisk": "\"{name}\" has been changed on disk. Do you want to reload it?",
+      "documentAutoReloaded": "Document automatically reloaded from disk"
     },
     "help": {
       "lineEndingAssertionError": "Line ending assertion error"

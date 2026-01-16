@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:mac:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run rebuild-native:*)",
+      "Bash(CXXFLAGS=\"-std=c++17\" npm run rebuild-native:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx electron-builder:*)",
+      "Read(//Users/michaeljosephwork/git/marktext_messed_up/**)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(git remote add:*)",
+      "Bash(git fetch:*)",
+      "Bash(git cherry-pick:*)",
+      "Bash(git checkout:*)",
+      "Bash(git reset:*)",
+      "Bash(git stash:*)",
+      "Bash(git log:*)",
+      "Bash(git merge:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(gh pr create:*)",
+      "Bash(cat:*)",
+      "Bash(npx patch-package)",
+      "Bash(ls:*)",
+      "Bash(awk:*)",
+      "Bash(npx patch-package:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

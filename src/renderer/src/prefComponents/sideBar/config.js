@@ -5,6 +5,7 @@ import ThemeIcon from '@/assets/icons/pref_theme.svg'
 import ImageIcon from '@/assets/icons/pref_image.svg'
 import SpellIcon from '@/assets/icons/pref_spellcheck.svg'
 import KeyBindingIcon from '@/assets/icons/pref_key_binding.svg'
+import ExperimentalIcon from '@/assets/icons/pref_experimental.svg'
 
 import preferences from '../../../../main/preferences/schema.json'
 import { t } from '../../i18n'
@@ -51,6 +52,12 @@ export const getCategory = () => [
     label: 'keybindings',
     icon: KeyBindingIcon,
     path: '/preference/keybindings'
+  },
+  {
+    name: t('preferences.categories.experimental'),
+    label: 'experimental',
+    icon: ExperimentalIcon,
+    path: '/preference/experimental'
   }
 ]
 
@@ -93,7 +100,7 @@ export const getTranslatedSearchContent = () => {
 
       // 计算用于路由跳转的分类（仅允许已存在的路由，否则回退到 general）
       let routeCategory = mappedCategory
-      const validRoutes = ['general', 'editor', 'markdown', 'spelling', 'theme', 'image', 'keybindings']
+      const validRoutes = ['general', 'editor', 'markdown', 'spelling', 'theme', 'image', 'keybindings', 'experimental']
       if (!validRoutes.includes(routeCategory)) routeCategory = 'general'
       
       // 尝试翻译分类和项目

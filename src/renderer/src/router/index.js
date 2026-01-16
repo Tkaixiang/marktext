@@ -7,6 +7,7 @@ import SpellChecker from '@/prefComponents/spellchecker'
 import Theme from '@/prefComponents/theme'
 import Image from '@/prefComponents/image'
 import Keybindings from '@/prefComponents/keybindings'
+import Experimental from '@/prefComponents/experimental'
 
 const parseSettingsPage = (type) => {
   let pageUrl = '/preference'
@@ -67,6 +68,11 @@ const routes = (type) => [
         path: 'keybindings',
         component: Keybindings,
         name: 'keybindings'
+      },
+      {
+        path: 'experimental',
+        component: Experimental,
+        name: 'experimental'
       }
     ]
   }
