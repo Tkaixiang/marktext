@@ -27,7 +27,7 @@
       center
       dir="ltr"
     >
-      <template #title>
+      <template #header>
         <div class="dialog-title">{{ t('editor.insertTable.title') }}</div>
       </template>
       <el-form :model="tableChecker" :inline="true">

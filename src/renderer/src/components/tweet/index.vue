@@ -7,7 +7,7 @@
       custom-class="ag-dialog-table"
       width="450px"
     >
-      <template #title>
+      <template #header>
         <div class="title">
           <span>{{ t('tweet.title') }}</span>
         </div>
