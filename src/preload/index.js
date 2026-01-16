@@ -195,8 +195,40 @@ const bufferAPI = {
 
 // @electron/remote API - expose remote module functionality to renderer
 // This provides getCurrentWindow, Menu, MenuItem access
+// NOTE: BrowserWindow objects cannot be serialized through contextBridge,
+// so we create a wrapper with individual callable methods
 const remoteAPI = {
-  getCurrentWindow: () => getCurrentWindow(),
+  // Return a serializable wrapper instead of the real BrowserWindow
+  getCurrentWindow: () => {
+    const win = getCurrentWindow()
+    return {
+      // Window state queries
+      isFullScreen: () => win.isFullScreen(),
+      isMaximized: () => win.isMaximized(),
+      isMinimized: () => win.isMinimized(),
+      isVisible: () => win.isVisible(),
+      isFocused: () => win.isFocused(),
+
+      // Window actions
+      close: () => win.close(),
+      minimize: () => win.minimize(),
+      maximize: () => win.maximize(),
+      unmaximize: () => win.unmaximize(),
+      restore: () => win.restore(),
+      setFullScreen: (flag) => win.setFullScreen(flag),
+      show: () => win.show(),
+      hide: () => win.hide(),
+      focus: () => win.focus(),
+
+      // Window properties
+      getBounds: () => win.getBounds(),
+      setBounds: (bounds) => win.setBounds(bounds),
+      getSize: () => win.getSize(),
+      setSize: (width, height) => win.setSize(width, height),
+      getPosition: () => win.getPosition(),
+      setPosition: (x, y) => win.setPosition(x, y)
+    }
+  },
   createMenu: () => new Menu(),
   createMenuItem: (options) => new MenuItem(options),
   // Menu class methods exposed as functions
