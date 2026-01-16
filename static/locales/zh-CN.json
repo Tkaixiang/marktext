@@ -845,7 +845,13 @@
       "importCustomThemes": "导入自定义主题",
       "importTheme": "导入主题",
       "openFolder": "打开文件夹",
-      "openThemesFolder": "打开主题文件夹"
+      "openThemesFolder": "打开主题文件夹",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "快捷键",

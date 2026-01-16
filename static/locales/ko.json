@@ -846,7 +846,13 @@
       "importCustomThemes": "사용자 정의 테마 가져오기",
       "importTheme": "테마 가져오기",
       "openFolder": "폴더 열기",
-      "openThemesFolder": "테마 폴더 열기"
+      "openThemesFolder": "테마 폴더 열기",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "키 바인딩",

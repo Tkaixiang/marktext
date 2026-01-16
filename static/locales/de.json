@@ -844,7 +844,13 @@
       "importCustomThemes": "Benutzerdefinierte Designs importieren",
       "importTheme": "Design importieren",
       "openFolder": "Ordner öffnen",
-      "openThemesFolder": "Design-Ordner öffnen"
+      "openThemesFolder": "Design-Ordner öffnen",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "Tastenkürzel",

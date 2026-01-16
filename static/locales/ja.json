@@ -846,7 +846,13 @@
       "importCustomThemes": "カスタムテーマをインポート",
       "importTheme": "テーマをインポート",
       "openFolder": "フォルダを開く",
-      "openThemesFolder": "テーマフォルダを開く"
+      "openThemesFolder": "テーマフォルダを開く",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "キーバインド",

@@ -846,7 +846,13 @@
       "importCustomThemes": "Importar temas personalizados",
       "importTheme": "Importar Tema",
       "openFolder": "Abrir Pasta",
-      "openThemesFolder": "Abrir pasta de temas"
+      "openThemesFolder": "Abrir pasta de temas",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "Atalhos de Teclado",

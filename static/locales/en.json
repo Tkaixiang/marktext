@@ -844,7 +844,13 @@
       "importCustomThemes": "Import custom themes",
       "importTheme": "Import Theme",
       "openFolder": "Open Folder",
-      "openThemesFolder": "Open themes folder"
+      "openThemesFolder": "Open themes folder",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "Keybindings",

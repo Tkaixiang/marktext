@@ -846,7 +846,13 @@
       "importCustomThemes": "匯入自訂主題",
       "importTheme": "匯入主題",
       "openFolder": "開啟資料夾",
-      "openThemesFolder": "開啟主題資料夾"
+      "openThemesFolder": "開啟主題資料夾",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "按鍵綁定",

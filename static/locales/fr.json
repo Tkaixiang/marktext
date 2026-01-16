@@ -846,7 +846,13 @@
       "importCustomThemes": "Importer des thèmes personnalisés",
       "importTheme": "Importer un thème",
       "openFolder": "Ouvrir le dossier",
-      "openThemesFolder": "Ouvrir le dossier des thèmes"
+      "openThemesFolder": "Ouvrir le dossier des thèmes",
+      "cadmiumLight": "Cadmium Light",
+      "dark": "Dark",
+      "graphiteLight": "Graphite Light",
+      "materialDark": "Material Dark",
+      "oneDark": "One Dark",
+      "ulyssesLight": "Ulysses Light"
     },
     "keybindings": {
       "title": "Raccourcis clavier",
