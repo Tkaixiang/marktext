@@ -60,9 +60,11 @@ process.on('unhandledRejection', (reason) => {
 })
 
 // -----------------------------------------------
-// Disable GPU if requested
+// Disable GPU - always disable during development to prevent crashes
+// TODO: Remove this once renderer stability issues are resolved
+app.disableHardwareAcceleration()
 if (args['--disable-gpu']) {
-  app.disableHardwareAcceleration()
+  // Flag is now redundant but kept for compatibility
 }
 
 // Single instance lock (except macOS & development)

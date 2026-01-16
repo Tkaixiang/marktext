@@ -10,6 +10,9 @@ export const editorWinOptions = Object.freeze({
     // SECURITY FIX: Enable context isolation to protect against RCE attacks
     // This separates renderer from Node.js and requires using contextBridge
     contextIsolation: true,
+    // Disable sandbox to allow preload script to use Node.js require
+    // This is needed for fs-extra and other Node modules in preload
+    sandbox: false,
     // WORKAROUND: We cannot enable spellcheck if it was disabled during
     // renderer startup due to a bug in Electron (Electron#32755). We'll
     // enable it always and set the HTML spelling attribute to false.
@@ -36,6 +39,8 @@ export const preferencesWinOptions = Object.freeze({
   webPreferences: {
     // SECURITY FIX: Enable context isolation to protect against RCE attacks
     contextIsolation: true,
+    // Disable sandbox to allow preload script to use Node.js require
+    sandbox: false,
     // Always true to access native spellchecker.
     spellcheck: true,
     // SECURITY FIX: Disable node integration in renderer for security

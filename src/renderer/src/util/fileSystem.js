@@ -5,12 +5,12 @@ import { Octokit } from '@octokit/rest'
 import { isWindows } from './index'
 
 // Access Node.js APIs through window (exposed by preload/contextBridge)
-const crypto = window.crypto
+const crypto = window.nodeCrypto
 const { statSync, constants } = window.fileUtils
 const { exec, execFile } = window.childProcess
-const tmpdir = window.os.tmpdir
-const Buffer = window.Buffer
-const process = window.process
+const tmpdir = window.nodeOs.tmpdir
+const Buffer = window.nodeBuffer
+const process = window.nodeProcess
 
 export const create = async (pathname, type) => {
   return type === 'directory'

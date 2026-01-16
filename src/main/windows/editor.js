@@ -81,6 +81,11 @@ class EditorWindow extends BaseWindow {
     remoteEnable(win.webContents)
     this.id = win.id
 
+    // Debug: Open DevTools automatically in development
+    if (process.env.NODE_ENV === 'development') {
+      win.webContents.openDevTools()
+    }
+
     if (spellcheckerEnabled && !isOsx) {
       try {
         switchLanguage(win, spellcheckerLanguage)

@@ -1,7 +1,8 @@
-import { contextBridge, shell, clipboard, webUtils } from 'electron'
+import { contextBridge, shell, clipboard, webUtils, ipcRenderer } from 'electron'
+import { getCurrentWindow, Menu, MenuItem, clipboard as remoteClipboard } from '@electron/remote'
 import fs from 'fs-extra'
 import { statSync, constants as fsConstants } from 'fs'
-import { exec, execFile } from 'child_process'
+import { exec, execFile, spawn } from 'child_process'
 import { tmpdir } from 'os'
 import crypto from 'crypto'
 import { Buffer } from 'buffer'
@@ -91,12 +92,13 @@ const cryptoAPI = {
   createHash: (algorithm) => crypto.createHash(algorithm)
 }
 
-// Child process API - for executing external commands (PicGo, custom scripts)
-// NOTE: This is potentially dangerous but required for image upload functionality
+// Child process API - for executing external commands (PicGo, custom scripts, ripgrep)
+// NOTE: This is potentially dangerous but required for image upload and search functionality
 // These should only be used with validated/sanitized input
 const childProcessAPI = {
   exec: (command, options, callback) => exec(command, options, callback),
-  execFile: (file, args, options, callback) => execFile(file, args, options, callback)
+  execFile: (file, args, options, callback) => execFile(file, args, options, callback),
+  spawn: (command, args, options) => spawn(command, args, options)
 }
 
 // OS utilities API
@@ -119,6 +121,42 @@ const bufferAPI = {
   from: (data, encoding) => Buffer.from(data, encoding)
 }
 
+// @electron/remote API - expose remote module functionality to renderer
+// This provides getCurrentWindow, Menu, MenuItem access
+const remoteAPI = {
+  getCurrentWindow: () => getCurrentWindow(),
+  createMenu: () => new Menu(),
+  createMenuItem: (options) => new MenuItem(options),
+  // Menu class methods exposed as functions
+  Menu: {
+    buildFromTemplate: (template) => Menu.buildFromTemplate(template),
+    getApplicationMenu: () => Menu.getApplicationMenu(),
+    setApplicationMenu: (menu) => Menu.setApplicationMenu(menu)
+  },
+  // Clipboard from remote (has more features than regular clipboard)
+  clipboard: {
+    readText: (type) => remoteClipboard.readText(type),
+    writeText: (text, type) => remoteClipboard.writeText(text, type),
+    readHTML: (type) => remoteClipboard.readHTML(type),
+    writeHTML: (markup, type) => remoteClipboard.writeHTML(markup, type),
+    readImage: (type) => remoteClipboard.readImage(type),
+    writeImage: (image, type) => remoteClipboard.writeImage(image, type),
+    readRTF: (type) => remoteClipboard.readRTF(type),
+    writeRTF: (text, type) => remoteClipboard.writeRTF(text, type),
+    clear: (type) => remoteClipboard.clear(type),
+    availableFormats: (type) => remoteClipboard.availableFormats(type),
+    has: (format, type) => remoteClipboard.has(format, type),
+    read: (format) => remoteClipboard.read(format),
+    readBuffer: (format) => remoteClipboard.readBuffer(format),
+    writeBuffer: (format, buffer, type) => remoteClipboard.writeBuffer(format, buffer, type),
+    write: (data, type) => remoteClipboard.write(data, type),
+    readBookmark: () => remoteClipboard.readBookmark(),
+    writeBookmark: (title, url, type) => remoteClipboard.writeBookmark(title, url, type),
+    readFindText: () => remoteClipboard.readFindText(),
+    writeFindText: (text) => remoteClipboard.writeFindText(text)
+  }
+}
+
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
@@ -133,11 +171,12 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('path', path)
     contextBridge.exposeInMainWorld('commandExists', commandAPI)
     contextBridge.exposeInMainWorld('i18nUtils', i18nUtils)
-    contextBridge.exposeInMainWorld('crypto', cryptoAPI)
+    contextBridge.exposeInMainWorld('nodeCrypto', cryptoAPI)
     contextBridge.exposeInMainWorld('childProcess', childProcessAPI)
-    contextBridge.exposeInMainWorld('os', osAPI)
-    contextBridge.exposeInMainWorld('process', processAPI)
-    contextBridge.exposeInMainWorld('Buffer', bufferAPI)
+    contextBridge.exposeInMainWorld('nodeOs', osAPI)
+    contextBridge.exposeInMainWorld('nodeProcess', processAPI)
+    contextBridge.exposeInMainWorld('nodeBuffer', bufferAPI)
+    contextBridge.exposeInMainWorld('remote', remoteAPI)
   } catch (error) {
     console.error(error)
   }
@@ -149,9 +188,10 @@ if (process.contextIsolated) {
   window.path = path
   window.commandExists = commandAPI
   window.i18nUtils = i18nUtils
-  window.crypto = cryptoAPI
+  window.nodeCrypto = cryptoAPI
   window.childProcess = childProcessAPI
-  window.os = osAPI
-  window.process = processAPI
-  window.Buffer = bufferAPI
+  window.nodeOs = osAPI
+  window.nodeProcess = processAPI
+  window.nodeBuffer = bufferAPI
+  window.remote = remoteAPI
 }

@@ -166,6 +166,7 @@ export const deepClone = (obj) => {
   return JSON.parse(JSON.stringify(obj))
 }
 
-export const isOsx = process.platform === 'darwin'
-export const isWindows = process.platform === 'win32'
-export const isLinux = process.platform === 'linux'
+// Use nodeProcess exposed via preload instead of Node's process
+export const isOsx = window.nodeProcess?.platform === 'darwin'
+export const isWindows = window.nodeProcess?.platform === 'win32'
+export const isLinux = window.nodeProcess?.platform === 'linux'
