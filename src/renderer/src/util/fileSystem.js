@@ -1,11 +1,16 @@
-import crypto from 'crypto'
-
-import { statSync, constants } from 'fs'
-import { exec, execFile } from 'child_process'
-import { tmpdir } from 'os'
+// SECURITY FIX: Use window APIs exposed via contextBridge instead of direct Node.js imports
+// These APIs are securely exposed from the preload script
 import dayjs from 'dayjs'
 import { Octokit } from '@octokit/rest'
 import { isWindows } from './index'
+
+// Access Node.js APIs through window (exposed by preload/contextBridge)
+const crypto = window.crypto
+const { statSync, constants } = window.fileUtils
+const { exec, execFile } = window.childProcess
+const tmpdir = window.os.tmpdir
+const Buffer = window.Buffer
+const process = window.process
 
 export const create = async (pathname, type) => {
   return type === 'directory'

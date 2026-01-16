@@ -35,19 +35,48 @@ export default [
       }
     },
     rules: {
+      // Style rules
       indent: ['error', 2, { SwitchCase: 1, ignoreComments: true }],
       semi: ['error', 'never'],
+      'space-before-function-paren': ['error', 'never'],
+      'arrow-parens': 'off',
+
+      // Error prevention
       'no-return-await': 'error',
       'no-return-assign': 'error',
       'no-new': 'error',
-      'arrow-parens': 'off',
-      'no-console': 'off',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+
+      // Console statements - warn in dev, error in production
+      'no-console': process.env.NODE_ENV === 'production' ? ['error', {
+        allow: ['warn', 'error']
+      }] : 'off',
+
+      // Code quality improvements
+      'complexity': ['warn', { max: 20 }],
+      'max-depth': ['warn', { max: 4 }],
+      'max-lines-per-function': ['warn', {
+        max: 150,
+        skipBlankLines: true,
+        skipComments: true
+      }],
+      'max-params': ['warn', { max: 5 }],
+
+      // Best practices
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+
+      // Security
+      'no-unsafe-optional-chaining': 'error',
+
+      // Existing overrides
       'require-atomic-updates': 'off',
       'prefer-const': 'off',
       'no-mixed-operators': 'off',
-      'no-prototype-builtins': 'off',
-      'space-before-function-paren': ['error', 'never']
+      'no-prototype-builtins': 'off'
     },
     ignores: ['node_modules', 'src/muya/dist/**/*', 'src/muya/webpack.config.js']
   },

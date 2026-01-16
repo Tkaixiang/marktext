@@ -7,12 +7,17 @@ export const editorWinOptions = Object.freeze({
   minWidth: 550,
   minHeight: 350,
   webPreferences: {
-    contextIsolation: false,
+    // SECURITY FIX: Enable context isolation to protect against RCE attacks
+    // This separates renderer from Node.js and requires using contextBridge
+    contextIsolation: true,
     // WORKAROUND: We cannot enable spellcheck if it was disabled during
     // renderer startup due to a bug in Electron (Electron#32755). We'll
     // enable it always and set the HTML spelling attribute to false.
     spellcheck: true,
-    nodeIntegration: true,
+    // SECURITY FIX: Disable node integration in renderer for security
+    nodeIntegration: false,
+    // TODO: Enable webSecurity in future (requires custom protocol for local files)
+    // Currently disabled to allow loading local markdown files
     webSecurity: false,
     preload: path.join(__dirname, '../preload/index.js')
   },
@@ -29,10 +34,13 @@ export const preferencesWinOptions = Object.freeze({
   width: 950,
   height: 650,
   webPreferences: {
-    contextIsolation: false,
+    // SECURITY FIX: Enable context isolation to protect against RCE attacks
+    contextIsolation: true,
     // Always true to access native spellchecker.
     spellcheck: true,
-    nodeIntegration: true,
+    // SECURITY FIX: Disable node integration in renderer for security
+    nodeIntegration: false,
+    // TODO: Enable webSecurity in future (requires custom protocol for local files)
     webSecurity: false,
     preload: path.join(__dirname, '../preload/index.js')
   },
