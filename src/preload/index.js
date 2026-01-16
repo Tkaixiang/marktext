@@ -16,12 +16,66 @@ import {
   isImageFile
 } from 'common/filesystem/paths'
 import { rgPath } from '@vscode/ripgrep'
-import path from 'path'
+import pathModule from 'path'
 import commandExists from 'command-exists'
 import { loadTranslations } from '../common/i18n'
 
 const i18nUtils = {
   loadTranslations
+}
+
+// Path API - Create a serializable wrapper for the path module
+// The raw path module contains native bindings that cannot be serialized through contextBridge
+const pathAPI = {
+  // Functions
+  basename: (...args) => pathModule.basename(...args),
+  dirname: (...args) => pathModule.dirname(...args),
+  extname: (...args) => pathModule.extname(...args),
+  format: (pathObject) => pathModule.format(pathObject),
+  isAbsolute: (path) => pathModule.isAbsolute(path),
+  join: (...args) => pathModule.join(...args),
+  normalize: (path) => pathModule.normalize(path),
+  parse: (path) => pathModule.parse(path),
+  relative: (from, to) => pathModule.relative(from, to),
+  resolve: (...args) => pathModule.resolve(...args),
+  toNamespacedPath: (path) => pathModule.toNamespacedPath(path),
+
+  // Constants
+  delimiter: pathModule.delimiter,
+  sep: pathModule.sep,
+
+  // Platform-specific objects - create serializable versions
+  posix: {
+    basename: (...args) => pathModule.posix.basename(...args),
+    dirname: (...args) => pathModule.posix.dirname(...args),
+    extname: (...args) => pathModule.posix.extname(...args),
+    format: (pathObject) => pathModule.posix.format(pathObject),
+    isAbsolute: (path) => pathModule.posix.isAbsolute(path),
+    join: (...args) => pathModule.posix.join(...args),
+    normalize: (path) => pathModule.posix.normalize(path),
+    parse: (path) => pathModule.posix.parse(path),
+    relative: (from, to) => pathModule.posix.relative(from, to),
+    resolve: (...args) => pathModule.posix.resolve(...args),
+    toNamespacedPath: (path) => pathModule.posix.toNamespacedPath(path),
+    delimiter: pathModule.posix.delimiter,
+    sep: pathModule.posix.sep
+  },
+
+  win32: {
+    basename: (...args) => pathModule.win32.basename(...args),
+    dirname: (...args) => pathModule.win32.dirname(...args),
+    extname: (...args) => pathModule.win32.extname(...args),
+    format: (pathObject) => pathModule.win32.format(pathObject),
+    isAbsolute: (path) => pathModule.win32.isAbsolute(path),
+    join: (...args) => pathModule.win32.join(...args),
+    normalize: (path) => pathModule.win32.normalize(path),
+    parse: (path) => pathModule.win32.parse(path),
+    relative: (from, to) => pathModule.win32.relative(from, to),
+    resolve: (...args) => pathModule.win32.resolve(...args),
+    toNamespacedPath: (path) => pathModule.win32.toNamespacedPath(path),
+    delimiter: pathModule.win32.delimiter,
+    sep: pathModule.win32.sep
+  }
 }
 
 const customElectronAPI = {
@@ -88,8 +142,26 @@ const commandAPI = {
 }
 
 // Crypto utilities API - for hashing operations
+// NOTE: Hash objects cannot be serialized through contextBridge, so we provide
+// complete hashing functions instead of exposing createHash directly
 const cryptoAPI = {
-  createHash: (algorithm) => crypto.createHash(algorithm)
+  // Complete hash function - performs hash in one call
+  hash: (algorithm, content, encoding, outputEncoding = 'hex') => {
+    return crypto.createHash(algorithm).update(content, encoding).digest(outputEncoding)
+  },
+
+  // Legacy compatibility - returns an object with update/digest methods that work across the bridge
+  createHash: (algorithm) => {
+    const hash = crypto.createHash(algorithm)
+    return {
+      update: (data, encoding) => {
+        hash.update(data, encoding)
+        return {
+          digest: (outputEncoding) => hash.digest(outputEncoding)
+        }
+      }
+    }
+  }
 }
 
 // Child process API - for executing external commands (PicGo, custom scripts, ripgrep)
@@ -168,7 +240,7 @@ if (process.contextIsolated) {
     })
     contextBridge.exposeInMainWorld('rgPath', rgPath)
     contextBridge.exposeInMainWorld('fileUtils', fileUtilsAPI)
-    contextBridge.exposeInMainWorld('path', path)
+    contextBridge.exposeInMainWorld('path', pathAPI)
     contextBridge.exposeInMainWorld('commandExists', commandAPI)
     contextBridge.exposeInMainWorld('i18nUtils', i18nUtils)
     contextBridge.exposeInMainWorld('nodeCrypto', cryptoAPI)
@@ -185,7 +257,7 @@ if (process.contextIsolated) {
   window.electron = { ...electronAPI, ...customElectronAPI }
   window.rgPath = rgPath
   window.fileUtils = fileUtilsAPI
-  window.path = path
+  window.path = pathAPI
   window.commandExists = commandAPI
   window.i18nUtils = i18nUtils
   window.nodeCrypto = cryptoAPI
