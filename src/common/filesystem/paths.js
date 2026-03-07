@@ -2,8 +2,10 @@ import fs from 'fs'
 import path from 'path'
 import { isFile, isFile2, isSymbolicLink } from './index'
 import { minimatch } from 'minimatch'
+import { shell } from 'electron'
 
 const isOsx = process.platform === 'darwin'
+const isWindows = process.platform === 'win32'
 
 export const MARKDOWN_EXTENSIONS = Object.freeze([
   'markdown',
@@ -30,7 +32,7 @@ export const IMAGE_EXTENSIONS = Object.freeze(['jpeg', 'jpg', 'png', 'gif', 'svg
  */
 export const hasMarkdownExtension = (filename) => {
   if (!filename || typeof filename !== 'string') return false
-  return MARKDOWN_EXTENSIONS.some((ext) => filename.toLowerCase().endsWith(`.${ext}`))
+  return MARKDOWN_EXTENSIONS.some((ext) => resolveShortcut(filename).toLowerCase().endsWith(`.${ext}`))
 }
 
 /**
@@ -132,4 +134,20 @@ export const checkPathExcludePattern = (pathname, patterns) => {
     }
   }
   return false
+}
+
+/**
+ * Returns the actual path pointed to by a shortcut file, or the original path if resolution fails.
+ * @param {string} The absolute path of the shortcut file.
+ */
+export const resolveShortcut = (shortcutPath) => {
+  try {
+    if (isWindows) {
+      return shell.readShortcutLink(shortcutPath)?.target || shortcutPath
+    } else {
+      return shortcutPath
+    }
+  } catch {
+    return shortcutPath
+  }
 }
