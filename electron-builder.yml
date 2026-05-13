@@ -104,6 +104,7 @@ nsis:
   include: windows/installer.nsh
 mac:
   artifactName: 'marktext-mac-${arch}-${version}.${ext}'
+  entitlements: build/mac/entitlements.mac.plist
   entitlementsInherit: build/mac/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
