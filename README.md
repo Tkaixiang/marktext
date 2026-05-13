@@ -17,9 +17,9 @@
 
 # Important Notice ⚠️
 
-> As of 13/5/2026, MarkText's original developer [has returned](https://github.com/marktext/marktext/issues/4191) to maintaining the original repository. This fork has been merged into the [original repository](https://github.com/marktext/marktext) and I will be helping to maintain MarkText there from now onwards as a contributor.
-> 
-> Thank you to everyone who has given valuable feedback and kept MarkText alive all these years :) cheers! 💘 [[PR that merged this fork](https://github.com/marktext/marktext/pull/4001)]
+As of 13/5/2026, MarkText's original developer [has returned](https://github.com/marktext/marktext/issues/4191) to maintaining the original repository. This fork has been merged into the [original repository](https://github.com/marktext/marktext) and I will be helping to maintain MarkText there from now onwards as a contributor.
+
+Thank you to everyone who has given valuable feedback and kept MarkText alive all these years :) cheers! 💘 [[PR that merged this fork](https://github.com/marktext/marktext/pull/4001)]
 
 ---
 
