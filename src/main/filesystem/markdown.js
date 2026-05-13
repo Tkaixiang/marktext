@@ -4,7 +4,7 @@ import log from 'electron-log'
 import iconv from 'iconv-lite'
 import { LINE_ENDING_REG, LF_LINE_ENDING_REG, CRLF_LINE_ENDING_REG } from '../config'
 import { isDirectory2 } from 'common/filesystem'
-import { isMarkdownFile } from 'common/filesystem/paths'
+import { isMarkdownFile, resolveShortcut } from 'common/filesystem/paths'
 import { normalizeAndResolvePath, writeFile } from '../filesystem'
 import { guessEncoding } from './encoding'
 
@@ -87,7 +87,7 @@ export const loadMarkdownFile = async (
   // TODO: Use streams to not buffer the file multiple times and only guess
   //       encoding on the first 256/512 bytes.
 
-  let buffer = await fsPromises.readFile(path.resolve(pathname))
+  let buffer = await fsPromises.readFile(path.resolve(resolveShortcut(pathname)))
 
   const encoding = guessEncoding(buffer, autoGuessEncoding)
   const supported = iconv.encodingExists(encoding.encoding)
